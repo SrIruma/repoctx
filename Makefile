@@ -4,7 +4,7 @@
 #   make build                 # bin/repoctx (local dev build)
 #   make test                  # go test ./...
 #   make install               # go install -> $GOBIN/repoctx
-#   make release VERSION=v0.1.0  # dist/repoctx_{linux_amd64,linux_arm64}
+#   make release VERSION=v0.1.0  # dist/ binaries + SHA256SUMS.txt
 #   make clean
 
 GO      ?= go
@@ -13,7 +13,8 @@ VERSION ?= dev
 # Version is injected at build time; see internal/cli/root.go.
 LD_FLAGS = -X github.com/SrIruma/repoctx/internal/cli.version=$(VERSION)
 
-PLATFORMS = linux/amd64 linux/arm64
+# Release targets. Override with PLATFORMS="linux/amd64" to narrow a build.
+PLATFORMS ?= linux/amd64 linux/arm64 windows/amd64
 
 .PHONY: all build test install release clean
 
@@ -31,18 +32,23 @@ install: ## Install the tool globally via go install.
 	$(GO) install -ldflags="$(LD_FLAGS)" ./cmd/repoctx
 	@echo "installed repoctx $(VERSION)"
 
+# Output file for a platform tuple. Windows binaries get a .exe suffix.
 release: ## Cross-compile a versioned release into dist/.
 	@test "$(VERSION)" != "dev" || (echo "release requires VERSION (e.g. VERSION=v0.1.0)" && exit 1)
 	@mkdir -p dist
+	@rm -f dist/repoctx_* dist/SHA256SUMS.txt
 	@for p in $(PLATFORMS); do \
 		os=$${p%/*}; arch=$${p#*/}; \
+		name=$$(echo repoctx_$${os}_$${arch}; if [ "$$os" = "windows" ]; then echo .exe; fi); \
 		echo "building repoctx for $$os/$$arch"; \
 		GOOS=$$os GOARCH=$$arch CGO_ENABLED=0 $(GO) build \
 			-ldflags="-s -w $(LD_FLAGS)" \
-			-o dist/repoctx_$${os}_$${arch} \
+			-o dist/$$name \
 			./cmd/repoctx; \
 	done
+	@cd dist && sha256sum repoctx_* > SHA256SUMS.txt
 	@echo "release: dist/ ($(VERSION))"
+	@cd dist && sha256sum -c SHA256SUMS.txt
 
 clean: ## Remove local build artifacts.
 	rm -rf bin dist
