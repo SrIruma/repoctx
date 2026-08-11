@@ -1,0 +1,6 @@
+{
+  "name": "stale-fixture",
+  "scripts": {
+    "test": "jest"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "scanner-mono",
+  "version": "0.1.0",
+  "scripts": {
+    "test": "vitest run",
+    "build": "tsc -b"
+  }
+}

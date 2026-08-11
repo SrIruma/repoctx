@@ -1,0 +1,13 @@
+[project]
+name = "mock-py"
+version = "0.1.0"
+dependencies = [
+  "requests>=2.0",
+  "click==8.1",
+]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100

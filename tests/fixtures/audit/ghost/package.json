@@ -1,0 +1,10 @@
+{
+  "name": "ghost-fixture",
+  "scripts": {
+    "test": "jest",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

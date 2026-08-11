@@ -1,0 +1,11 @@
+[package]
+name = "mock-rust"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = "1.0"
+anyhow = "1"
+
+[dev-dependencies]
+criterion = "0.5"
