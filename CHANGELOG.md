@@ -7,9 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
+### Fixed
 
-- Nothing yet.
+- `audit` no longer flags `AGENTS.md` / `CLAUDE.md` or Go symbols such as
+  `internal/cli.version` as stale paths. Path detection now uses a known set of
+  file extensions while keeping directory detection.
 
 ## [v0.1.0] - 2026-08-11
 
