@@ -98,13 +98,39 @@ func checkCommands(content string, actual []project.Command) Check {
 var (
 	backtickPath = regexp.MustCompile("`([^`]+)`")
 	linkPath     = regexp.MustCompile(`\[[^\]]*\]\(([^)\s]+)\)`)
-	fileExt      = regexp.MustCompile(`\.[A-Za-z][A-Za-z0-9]{0,7}$`)
 )
+
+// contextFileNames are the files repoctx itself manages. Mentioning them is
+// never "rot", so they are excluded from stale-path candidates.
+var contextFileNames = map[string]bool{
+	"AGENTS.md": true,
+	"CLAUDE.md": true,
+}
 
 // knownRootFiles are extensionless top-level files worth treating as paths.
 var knownRootFiles = map[string]bool{
 	"Makefile": true, "GNUmakefile": true, "LICENSE": true, "NOTICE": true,
 	"Dockerfile": true, "Jenkinsfile": true, "Gemfile": true, "Procfile": true,
+}
+
+// knownExtensions are file extensions considered path-like. The list is
+// deliberately finite: an unknown suffix is not treated as a file, so a Go
+// symbol such as "internal/cli.version" is never flagged as a stale path.
+var knownExtensions = map[string]bool{
+	"go": true, "rs": true, "py": true, "md": true, "txt": true,
+	"toml": true, "json": true, "yaml": true, "yml": true, "xml": true,
+	"sh": true, "bash": true, "ts": true, "tsx": true, "js": true, "jsx": true,
+	"mod": true, "sum": true, "lock": true, "env": true, "html": true, "css": true,
+}
+
+// extensionOf returns the part of s after the last dot, or "" when s has no dot
+// or ends with one.
+func extensionOf(s string) string {
+	i := strings.LastIndex(s, ".")
+	if i < 0 || i == len(s)-1 {
+		return ""
+	}
+	return s[i+1:]
 }
 
 // checkPaths flags repository paths mentioned anywhere in the context file
@@ -145,7 +171,7 @@ func candidatePaths(content string) []string {
 			s = s[:i]
 		}
 		s = strings.TrimSpace(s)
-		if s == "" || seen[s] || !isPathLike(s) {
+		if s == "" || seen[s] || contextFileNames[s] || !isPathLike(s) {
 			return
 		}
 		seen[s] = true
@@ -161,16 +187,26 @@ func candidatePaths(content string) []string {
 }
 
 // isPathLike filters candidates that plausibly reference a repository path:
-// relative paths, known extensionless files, or files with a real extension.
+// directories, known extensionless files, dotfiles, and files with a known
+// extension. Unknown-suffix symbols such as "internal/cli.version" are not
+// treated as paths.
 func isPathLike(s string) bool {
 	if strings.ContainsAny(s, " \t") || strings.Contains(s, "://") || strings.HasPrefix(s, "#") {
 		return false
 	}
-	if strings.Contains(s, "/") {
+	s = strings.TrimSuffix(s, "/")
+	if strings.HasPrefix(s, ".") {
 		return true
+	}
+	if strings.Contains(s, "/") {
+		last := s[strings.LastIndex(s, "/")+1:]
+		if !strings.Contains(last, ".") {
+			return true // directory path
+		}
+		return knownExtensions[extensionOf(last)]
 	}
 	if knownRootFiles[s] {
 		return true
 	}
-	return fileExt.MatchString(s)
+	return knownExtensions[extensionOf(s)]
 }
