@@ -43,7 +43,7 @@ func runGenerate(cmd *cobra.Command, dir string, files []string) error {
 	if err != nil {
 		return err
 	}
-	rendered := markdown.RenderTable(tableRows(p))
+	rendered := markdown.RenderSection(tableRows(p), moduleRows(p))
 	for _, f := range files {
 		path := f
 		if !filepath.IsAbs(path) {
@@ -84,6 +84,19 @@ func tableRows(p *project.Project) []markdown.Row {
 		for _, c := range m.Commands {
 			rows = append(rows, markdown.Row{Command: c.Cmd, Source: m.Path})
 		}
+	}
+	return rows
+}
+
+// moduleRows flattens every manifest into a renderable modules table row.
+func moduleRows(p *project.Project) []markdown.ModuleRow {
+	var rows []markdown.ModuleRow
+	for _, m := range p.Manifests {
+		rows = append(rows, markdown.ModuleRow{
+			Path:     m.Path,
+			Language: m.Language,
+			Deps:     strings.Join(m.Deps, ", "),
+		})
 	}
 	return rows
 }
