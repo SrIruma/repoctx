@@ -39,7 +39,7 @@ release: ## Cross-compile a versioned release into dist/.
 	@rm -f dist/repoctx_* dist/SHA256SUMS.txt
 	@for p in $(PLATFORMS); do \
 		os=$${p%/*}; arch=$${p#*/}; \
-		name=$$(echo repoctx_$${os}_$${arch}; if [ "$$os" = "windows" ]; then echo .exe; fi); \
+		if [ "$$os" = "windows" ]; then name="repoctx_$${os}_$${arch}.exe"; else name="repoctx_$${os}_$${arch}"; fi; \
 		echo "building repoctx for $$os/$$arch"; \
 		GOOS=$$os GOARCH=$$arch CGO_ENABLED=0 $(GO) build \
 			-ldflags="-s -w $(LD_FLAGS)" \
