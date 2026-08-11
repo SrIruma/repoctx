@@ -50,8 +50,32 @@ func TestGenerateRoundTrip(t *testing.T) {
 	if !strings.Contains(got, "| `npm run test` | `package.json` |") {
 		t.Errorf("table not updated:\n%s", got)
 	}
+	if !strings.Contains(got, "| `package.json` | JavaScript/TypeScript | typescript |") {
+		t.Errorf("modules table not rendered:\n%s", got)
+	}
 	if strings.Contains(got, "| stale |") {
 		t.Errorf("stale table not replaced:\n%s", got)
+	}
+}
+
+func TestGenerateModulesRoundTripKeepsCommandsOnly(t *testing.T) {
+	dir := writeTestProject(t, "# P\n\n## Commands\n\n"+
+		markdown.StartMarker+"\n| stale |\n"+markdown.EndMarker+"\n")
+	cmd := &cobra.Command{}
+	cmd.SetOut(&bytes.Buffer{})
+	if err := runGenerate(cmd, dir, []string{"AGENTS.md"}); err != nil {
+		t.Fatalf("runGenerate: %v", err)
+	}
+	data, err := os.ReadFile(filepath.Join(dir, "AGENTS.md"))
+	if err != nil {
+		t.Fatalf("read AGENTS.md: %v", err)
+	}
+	rows, err := markdown.ParseCommands(string(data))
+	if err != nil {
+		t.Fatalf("ParseCommands: %v", err)
+	}
+	if len(rows) != 1 || rows[0].Command != "npm run test" || rows[0].Source != "package.json" {
+		t.Errorf("expected exactly the npm command row, got %+v", rows)
 	}
 }
 

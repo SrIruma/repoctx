@@ -28,8 +28,9 @@ func RenderTable(rows []Row) string {
 }
 
 // ParseCommands reads the "| `cmd` | `source` |" rows back out of every marked
-// section of content, skipping table headers and separators. It returns
-// ErrNoMarkers when content has no marker pair.
+// section of content, skipping table headers, separators, and any other table
+// (only two-cell rows are treated as command rows). It returns ErrNoMarkers
+// when content has no marker pair.
 func ParseCommands(content string) ([]Row, error) {
 	sections, err := FindSections(content)
 	if err != nil {
@@ -47,7 +48,7 @@ func ParseCommands(content string) ([]Row, error) {
 				continue
 			}
 			cells := strings.Split(strings.TrimSuffix(strings.TrimPrefix(line, "|"), "|"), "|")
-			if len(cells) < 2 {
+			if len(cells) != 2 {
 				continue
 			}
 			cmd := strings.Trim(strings.TrimSpace(cells[0]), "`")
@@ -67,4 +68,40 @@ func RowString(r Row) string {
 		return fmt.Sprintf("%q", r.Command)
 	}
 	return fmt.Sprintf("%q (from %s)", r.Command, r.Source)
+}
+
+// ModuleRow is one entry in the generated modules table: a detected manifest,
+// its language, and its dependencies.
+type ModuleRow struct {
+	Path     string
+	Language string
+	Deps     string
+}
+
+// RenderModules renders the modules table that follows the commands table.
+func RenderModules(rows []ModuleRow) string {
+	var b strings.Builder
+	b.WriteString("| Module | Language | Dependencies |\n")
+	b.WriteString("|---|---|---|\n")
+	if len(rows) == 0 {
+		b.WriteString("| _no modules detected_ | | |\n")
+		return b.String()
+	}
+	for _, r := range rows {
+		b.WriteString("| `" + r.Path + "` | " + r.Language + " | " + r.Deps + " |\n")
+	}
+	return b.String()
+}
+
+// RenderSection renders the canonical block content for a project: the
+// commands table under a Commands header, then the modules table under a
+// Modules header. ParseCommands skips everything but two-cell command rows,
+// so the modules table round-trips without polluting the command list.
+func RenderSection(cmdRows []Row, modRows []ModuleRow) string {
+	var b strings.Builder
+	b.WriteString("## Commands\n\n")
+	b.WriteString(RenderTable(cmdRows))
+	b.WriteString("\n## Modules\n\n")
+	b.WriteString(RenderModules(modRows))
+	return strings.TrimSuffix(b.String(), "\n")
 }

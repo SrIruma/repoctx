@@ -23,6 +23,49 @@ func TestRenderTableEmpty(t *testing.T) {
 	}
 }
 
+func TestRenderModules(t *testing.T) {
+	rows := []ModuleRow{
+		{Path: "package.json", Language: "JavaScript/TypeScript", Deps: "typescript"},
+		{Path: "internal", Language: "Go", Deps: "cobra, go-toml"},
+	}
+	want := "| Module | Language | Dependencies |\n|---|---|---|\n" +
+		"| `package.json` | JavaScript/TypeScript | typescript |\n" +
+		"| `internal` | Go | cobra, go-toml |\n"
+	if got := RenderModules(rows); got != want {
+		t.Errorf("RenderModules:\n%s\nwant:\n%s", got, want)
+	}
+}
+
+func TestRenderModulesEmpty(t *testing.T) {
+	if got := RenderModules(nil); !strings.Contains(got, "_no modules detected_") {
+		t.Errorf("expected empty-state row, got:\n%s", got)
+	}
+}
+
+func TestRenderSectionRoundTrip(t *testing.T) {
+	commands := []Row{
+		{Command: "npm run test", Source: "package.json"},
+		{Command: "make build", Source: "Makefile"},
+	}
+	modules := []ModuleRow{
+		{Path: "package.json", Language: "JavaScript/TypeScript", Deps: "typescript"},
+		{Path: "Makefile", Language: "Generic (Make)", Deps: ""},
+	}
+	block := CanonicalBlock(RenderSection(commands, modules))
+	rows, err := ParseCommands(block)
+	if err != nil {
+		t.Fatalf("ParseCommands: %v", err)
+	}
+	if len(rows) != len(commands) {
+		t.Fatalf("expected %d command rows, got %d (module rows must be skipped):\n%s", len(commands), len(rows), block)
+	}
+	for i := range commands {
+		if rows[i] != commands[i] {
+			t.Errorf("rows[%d] = %+v, want %+v", i, rows[i], commands[i])
+		}
+	}
+}
+
 func TestFindSections(t *testing.T) {
 	doc := "Intro\n" + StartMarker + "\nold\n" + EndMarker + "\nOutro\n"
 	sections, err := FindSections(doc)
