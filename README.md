@@ -1,5 +1,12 @@
 # repoctx
 
+[![Go Version](https://img.shields.io/github/go-mod/go-version/SrIruma/repoctx)](https://go.dev/doc/install)
+[![CI](https://img.shields.io/github/actions/workflow/status/SrIruma/repoctx/ci.yml)](https://github.com/SrIruma/repoctx/actions)
+[![Release](https://img.shields.io/github/v/release/SrIruma/repoctx)](https://github.com/SrIruma/repoctx/releases)
+[![Downloads](https://img.shields.io/github/downloads/SrIruma/repoctx/total)](https://github.com/SrIruma/repoctx/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/SrIruma/repoctx)](https://goreportcard.com/report/github.com/SrIruma/repoctx)
+[![License](https://img.shields.io/github/license/SrIruma/repoctx)](LICENSE)
+
 repoctx keeps your AI coding-agent context files (`AGENTS.md`, `CLAUDE.md`) truthful. It scans a repository, extracts facts from the real code — build/test commands, module structure, dependencies — and uses them to regenerate the factual sections of your context files, preserving anything a human wrote.
 
 ## Why
@@ -29,6 +36,27 @@ make install # -> $GOBIN/repoctx
 
 Run `repoctx <command> --help` for full usage. Every command supports `--json`.
 
+## Demo
+
+Inspect what a monorepo looks like to repoctx:
+
+```console
+$ repoctx info tests/fixtures/scanner/mono
+Detected manifests in /path/to/scanner/mono:
+  backend/go.mod               go         Go                     commands: [build, test, vet, fmt]  (1 deps)
+  package.json                 npm        JavaScript/TypeScript  commands: [build, test]  (0 deps)
+  tools/rust/Cargo.toml        cargo      Rust                   commands: [build, test, run, fmt, clippy]  (0 deps)
+```
+
+Audit a context file and get a health score:
+
+```console
+$ repoctx audit tests/fixtures/audit/healthy
+PASS  /path/to/audit/healthy/AGENTS.md  score 100/100
+  ok  commands: 3 commands claimed
+  ok  paths: all referenced paths exist
+```
+
 ## How it works
 
 1. **Scan** — repoctx walks the repository (skipping `node_modules`, `.git`, build output, …) and detects manifests: `package.json`, `Cargo.toml`, `go.mod`, `pyproject.toml`, `Makefile`. Unsupported ecosystems (`CMakeLists.txt`, `Gemfile`, …) are reported, not ignored.
@@ -39,10 +67,8 @@ Run `repoctx <command> --help` for full usage. Every command supports `--json`.
 ## Markers
 
 ```markdown
-## Commands
-
 <!-- repoctx:start -->
-| Command | Description |
+| Command | Source |
 |---|---|
 | `make test` | Run the test suite |
 <!-- repoctx:end -->
@@ -56,9 +82,16 @@ Run `repoctx <command> --help` for full usage. Every command supports `--json`.
 make test      # go test ./...
 make build     # bin/repoctx
 make install   # $GOBIN/repoctx
-make release VERSION=v0.1.0   # dist/repoctx_linux_amd64, dist/repoctx_linux_arm64
+make release VERSION=v0.1.0   # dist/repoctx_linux_amd64, repoctx_linux_arm64, repoctx_windows_amd64.exe + SHA256SUMS.txt
 ```
+
+## Community
+
+- [Contributing](CONTRIBUTING.md) — how to set up, branch, commit, and test.
+- [Changelog](CHANGELOG.md) — release history.
+- [Code of Conduct](CODE_OF_CONDUCT.md) — community guidelines.
+- [Issues](https://github.com/SrIruma/repoctx/issues) — report bugs and request features.
 
 ## License
 
-MIT
+[MIT](LICENSE)
