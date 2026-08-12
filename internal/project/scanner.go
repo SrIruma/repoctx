@@ -31,9 +31,7 @@ var defaultSkipDirs = map[string]bool{
 // knownOtherManifests are ecosystems we detect but whose adapter is not
 // implemented yet. Detection degrades gracefully: they are reported, generic
 // checks still apply, extraction simply has no adapter.
-var knownOtherManifests = map[string]string{
-	"meson.build": "meson (adapter pending)",
-}
+var knownOtherManifests = map[string]string{}
 
 var manifestKinds = map[string]ManifestKind{
 	"package.json":     KindNPM,
@@ -49,6 +47,7 @@ var manifestKinds = map[string]ManifestKind{
 	"pom.xml":          KindMaven,
 	"build.gradle":     KindGradle,
 	"build.gradle.kts": KindGradle,
+	"meson.build":      KindMeson,
 }
 
 // Scanner walks a repository tree looking for project manifests.

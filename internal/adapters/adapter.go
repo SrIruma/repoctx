@@ -40,6 +40,8 @@ func For(k project.ManifestKind) (Adapter, bool) {
 		return mavenAdapter{}, true
 	case project.KindGradle:
 		return gradleAdapter{}, true
+	case project.KindMeson:
+		return mesonAdapter{}, true
 	}
 	return nil, false
 }

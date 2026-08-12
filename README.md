@@ -103,7 +103,7 @@ It composes with `--json` for machine-readable failures:
 
 ## How it works
 
-1. **Scan** — repoctx walks the repository (skipping `node_modules`, `.git`, build output, …) and detects manifests: `package.json`, `Cargo.toml`, `go.mod`, `pyproject.toml`, `Makefile`, `CMakeLists.txt`, `Gemfile`, `composer.json`, `pom.xml`, `build.gradle`. The only still-unsupported ecosystem (`meson.build`) is reported, not ignored.
+1. **Scan** — repoctx walks the repository (skipping `node_modules`, `.git`, build output, …) and detects manifests: `package.json`, `Cargo.toml`, `go.mod`, `pyproject.toml`, `Makefile`, `CMakeLists.txt`, `Gemfile`, `composer.json`, `pom.xml`, `build.gradle`, `meson.build`.
 2. **Extract** — each detected manifest is read by an adapter that turns it into facts: available commands and dependencies.
 3. **Generate** — the facts are written between `<!-- repoctx:start -->` / `<!-- repoctx:end -->` markers. Anything outside the markers — your prose, conventions, warnings — is left untouched.
 4. **Audit** — checks the claims in your context files against the current state of the code and scores the drift.

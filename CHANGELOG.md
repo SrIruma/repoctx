@@ -28,6 +28,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `info --json` gains an `errors` field per manifest and the human output
   prints a `!` warning per failed manifest. A corrupt manifest is a soft
   failure: the scan result stays usable and the exit code stays 0.
+- `meson.build` is now a first-class manifest with its own adapter:
+  it is detected and produces facts (commands `meson setup build`,
+  `meson compile -C build` and `meson test -C build`, and dependencies
+  from `dependency(...)` calls) instead of being reported as
+  "adapter pending".
 
 ## [v0.3.0] - 2026-08-12
 

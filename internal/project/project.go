@@ -16,6 +16,7 @@ const (
 	KindComposer  ManifestKind = "composer"
 	KindMaven     ManifestKind = "maven"
 	KindGradle    ManifestKind = "gradle"
+	KindMeson     ManifestKind = "meson"
 )
 
 // Command is a named project command (for example "test" -> "npm run test").

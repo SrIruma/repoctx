@@ -74,6 +74,9 @@ The code is split into small, single-purpose packages:
 | `make build` | `tests/fixtures/make/Makefile` |
 | `make clean` | `tests/fixtures/make/Makefile` |
 | `make test` | `tests/fixtures/make/Makefile` |
+| `meson setup build` | `tests/fixtures/meson/meson.build` |
+| `meson compile -C build` | `tests/fixtures/meson/meson.build` |
+| `meson test -C build` | `tests/fixtures/meson/meson.build` |
 | `npm run build` | `tests/fixtures/npm/package.json` |
 | `npm run lint` | `tests/fixtures/npm/package.json` |
 | `npm run test` | `tests/fixtures/npm/package.json` |
@@ -89,6 +92,9 @@ The code is split into small, single-purpose packages:
 | `npm run build` | `tests/fixtures/scanner/mono/package.json` |
 | `npm run test` | `tests/fixtures/scanner/mono/package.json` |
 | `bundle exec rake` | `tests/fixtures/scanner/poly5/Gemfile` |
+| `meson setup build` | `tests/fixtures/scanner/poly5/meson.build` |
+| `meson compile -C build` | `tests/fixtures/scanner/poly5/meson.build` |
+| `meson test -C build` | `tests/fixtures/scanner/poly5/meson.build` |
 
 ## Modules
 
@@ -106,6 +112,7 @@ The code is split into small, single-purpose packages:
 | `tests/fixtures/gradle/build.gradle` | Gradle | com.fasterxml.jackson.core:jackson-databind:2.17.0, com.google.guava:guava:33.2.0-jre, org.junit.jupiter:junit-jupiter:5.10.2, org.projectlombok:lombok:1.18.32 |
 | `tests/fixtures/make/Makefile` | Generic (Make) |  |
 | `tests/fixtures/maven/pom.xml` | Java | junit:junit, org.springframework.boot:spring-boot-starter-web:3.2.0 |
+| `tests/fixtures/meson/meson.build` | C/C++ | glib-2.0, gtk+-3.0 |
 | `tests/fixtures/npm/package.json` | JavaScript/TypeScript | react, typescript |
 | `tests/fixtures/pyproject/pyproject.toml` | Python | click, requests |
 | `tests/fixtures/ruby/Gemfile` | Ruby | puma, rails, rspec |
@@ -115,5 +122,6 @@ The code is split into small, single-purpose packages:
 | `tests/fixtures/scanner/poly5/Gemfile` | Ruby | rake |
 | `tests/fixtures/scanner/poly5/build.gradle` | Gradle |  |
 | `tests/fixtures/scanner/poly5/composer.json` | PHP |  |
+| `tests/fixtures/scanner/poly5/meson.build` | C/C++ | benchmark, gtest |
 | `tests/fixtures/scanner/poly5/pom.xml` | Java |  |
 <!-- repoctx:end -->
