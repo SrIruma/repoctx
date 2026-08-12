@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -35,7 +36,7 @@ func TestGenerateRoundTrip(t *testing.T) {
 		markdown.StartMarker+"\n| stale |\n"+markdown.EndMarker+"\n")
 	cmd := &cobra.Command{}
 	cmd.SetOut(&bytes.Buffer{})
-	if err := runGenerate(cmd, dir, []string{"AGENTS.md"}, resolved{}); err != nil {
+	if err := runGenerate(cmd, dir, []string{"AGENTS.md"}, resolved{}, false); err != nil {
 		t.Fatalf("runGenerate: %v", err)
 	}
 	data, err := os.ReadFile(filepath.Join(dir, "AGENTS.md"))
@@ -64,7 +65,7 @@ func TestGenerateModulesRoundTripKeepsCommandsOnly(t *testing.T) {
 		markdown.StartMarker+"\n| stale |\n"+markdown.EndMarker+"\n")
 	cmd := &cobra.Command{}
 	cmd.SetOut(&bytes.Buffer{})
-	if err := runGenerate(cmd, dir, []string{"AGENTS.md"}, resolved{}); err != nil {
+	if err := runGenerate(cmd, dir, []string{"AGENTS.md"}, resolved{}, false); err != nil {
 		t.Fatalf("runGenerate: %v", err)
 	}
 	data, err := os.ReadFile(filepath.Join(dir, "AGENTS.md"))
@@ -84,7 +85,7 @@ func TestGenerateCreatesMissingFile(t *testing.T) {
 	dir := writeTestProject(t, "")
 	cmd := &cobra.Command{}
 	cmd.SetOut(&bytes.Buffer{})
-	if err := runGenerate(cmd, dir, []string{"CLAUDE.md"}, resolved{}); err != nil {
+	if err := runGenerate(cmd, dir, []string{"CLAUDE.md"}, resolved{}, false); err != nil {
 		t.Fatalf("runGenerate: %v", err)
 	}
 	data, err := os.ReadFile(filepath.Join(dir, "CLAUDE.md"))
@@ -99,8 +100,112 @@ func TestGenerateCreatesMissingFile(t *testing.T) {
 func TestGenerateFailsWithoutMarkers(t *testing.T) {
 	dir := writeTestProject(t, "# no markers here")
 	cmd := &cobra.Command{}
-	if err := runGenerate(cmd, dir, []string{"AGENTS.md"}, resolved{}); err == nil {
+	if err := runGenerate(cmd, dir, []string{"AGENTS.md"}, resolved{}, false); err == nil {
 		t.Fatal("expected error for a file without markers")
+	}
+}
+
+func TestGenerateDryRunReportsUpdateWithoutWriting(t *testing.T) {
+	dir := writeTestProject(t, "# My Project\n\nHuman notes.\n\n## Commands\n\n"+
+		markdown.StartMarker+"\n| stale |\n"+markdown.EndMarker+"\n")
+	path := filepath.Join(dir, "AGENTS.md")
+	old := time.Now().Add(-time.Hour)
+	if err := os.Chtimes(path, old, old); err != nil {
+		t.Fatalf("set mtime: %v", err)
+	}
+	before, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cmd := &cobra.Command{}
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	if err := runGenerate(cmd, dir, []string{"AGENTS.md"}, resolved{}, true); err != nil {
+		t.Fatalf("runGenerate dry-run: %v", err)
+	}
+	out := buf.String()
+	if !strings.Contains(out, "would update AGENTS.md") {
+		t.Errorf("dry-run should report what would change, got:\n%s", out)
+	}
+
+	after, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(before, after) {
+		t.Errorf("dry-run wrote the file:\n%s", after)
+	}
+	fi, err := os.Stat(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !fi.ModTime().Equal(old) {
+		t.Errorf("mtime changed: got %v, want %v", fi.ModTime(), old)
+	}
+}
+
+func TestGenerateDryRunUpToDate(t *testing.T) {
+	dir := writeTestProject(t, "# P\n\n## Commands\n\n"+
+		markdown.StartMarker+"\n| stale |\n"+markdown.EndMarker+"\n")
+	cmd := &cobra.Command{}
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	if err := runGenerate(cmd, dir, []string{"AGENTS.md"}, resolved{}, false); err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	data, err := os.ReadFile(filepath.Join(dir, "AGENTS.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cmd = &cobra.Command{}
+	buf.Reset()
+	cmd.SetOut(&buf)
+	if err := runGenerate(cmd, dir, []string{"AGENTS.md"}, resolved{}, true); err != nil {
+		t.Fatalf("runGenerate dry-run: %v", err)
+	}
+	if !strings.Contains(buf.String(), "is up to date") {
+		t.Errorf("dry-run should report up-to-date file, got:\n%s", buf.String())
+	}
+	after, err := os.ReadFile(filepath.Join(dir, "AGENTS.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(data, after) {
+		t.Errorf("dry-run modified an up-to-date file")
+	}
+}
+
+func TestGenerateDryRunVersusRealRun(t *testing.T) {
+	dir := writeTestProject(t, "# P\n\n## Commands\n\n"+
+		markdown.StartMarker+"\n| stale |\n"+markdown.EndMarker+"\n")
+	path := filepath.Join(dir, "AGENTS.md")
+
+	cmd := &cobra.Command{}
+	cmd.SetOut(&bytes.Buffer{})
+	if err := runGenerate(cmd, dir, []string{"AGENTS.md"}, resolved{}, true); err != nil {
+		t.Fatalf("dry-run: %v", err)
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(data), "| stale |") {
+		t.Errorf("dry-run wrote content; file changed:\n%s", data)
+	}
+
+	cmd = &cobra.Command{}
+	cmd.SetOut(&bytes.Buffer{})
+	if err := runGenerate(cmd, dir, []string{"AGENTS.md"}, resolved{}, false); err != nil {
+		t.Fatalf("real run: %v", err)
+	}
+	data, err = os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(data), "| stale |") {
+		t.Errorf("real run did not replace stale content:\n%s", data)
 	}
 }
 

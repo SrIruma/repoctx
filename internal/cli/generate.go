@@ -14,6 +14,7 @@ import (
 
 func newGenerateCmd() *cobra.Command {
 	var files []string
+	var dryRun bool
 	var opts scanFlags
 	cmd := &cobra.Command{
 		Use:   "generate [dir]",
@@ -40,16 +41,18 @@ func newGenerateCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			return runGenerate(cmd, dir, res.files, res)
+			return runGenerate(cmd, dir, res.files, res, dryRun)
 		},
 	}
 	cmd.Flags().StringSliceVar(&files, "file", nil,
 		"context file to update (repeatable, default AGENTS.md)")
+	cmd.Flags().BoolVar(&dryRun, "dry-run", false,
+		"report what would change without writing any file")
 	addScanFlags(cmd, &opts)
 	return cmd
 }
 
-func runGenerate(cmd *cobra.Command, dir string, files []string, opts resolved) error {
+func runGenerate(cmd *cobra.Command, dir string, files []string, opts resolved, dryRun bool) error {
 	abs, err := filepath.Abs(dir)
 	if err != nil {
 		return err
@@ -64,7 +67,19 @@ func runGenerate(cmd *cobra.Command, dir string, files []string, opts resolved) 
 		if !filepath.IsAbs(path) {
 			path = filepath.Join(abs, f)
 		}
-		if err := generateFile(path, rendered); err != nil {
+		out, changed, err := planFile(path, rendered)
+		if err != nil {
+			return fmt.Errorf("%s: %w", f, err)
+		}
+		if dryRun {
+			if changed {
+				fmt.Fprintf(cmd.OutOrStdout(), "would update %s\n", f)
+			} else {
+				fmt.Fprintf(cmd.OutOrStdout(), "%s is up to date\n", f)
+			}
+			continue
+		}
+		if err := os.WriteFile(path, []byte(out), 0o644); err != nil {
 			return fmt.Errorf("%s: %w", f, err)
 		}
 		fmt.Fprintf(cmd.OutOrStdout(), "generated %s\n", f)
@@ -72,23 +87,24 @@ func runGenerate(cmd *cobra.Command, dir string, files []string, opts resolved) 
 	return nil
 }
 
-// generateFile writes rendered content into the marked section of path. If the
-// file does not exist yet it is created with a fresh marked section. Existing
-// files without markers are left untouched (error), never half-rewritten.
-func generateFile(path, rendered string) error {
+// planFile computes the content path would get after a generation and whether
+// it differs from what is on disk. A missing file is planned for creation with
+// a fresh marked section. Existing files without markers are an error, never
+// half-rewritten.
+func planFile(path, rendered string) (out string, changed bool, err error) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		doc := "# Commands\n\n" + markdown.CanonicalBlock(strings.TrimSpace(rendered)) + "\n"
-		return os.WriteFile(path, []byte(doc), 0o644)
+		return doc, true, nil
 	}
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return err
+		return "", false, err
 	}
-	out, err := markdown.Update(string(data), rendered)
+	out, err = markdown.Update(string(data), rendered)
 	if err != nil {
-		return err
+		return "", false, err
 	}
-	return os.WriteFile(path, []byte(out), 0o644)
+	return out, out != string(data), nil
 }
 
 // tableRows flattens every manifest's commands into renderable rows, in the
