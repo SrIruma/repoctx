@@ -174,6 +174,7 @@ make release VERSION=v0.4.0   # dist/repoctx_linux_amd64, repoctx_linux_arm64, r
 - [Changelog](CHANGELOG.md) — release history.
 - [Contract](docs/contract.md) — exit codes, JSON schemas and contract flags.
 - [Examples](docs/examples.md) — verified usage in every case (generated).
+- [Migration](docs/migration.md) — what changes between 0.x and 1.0.0.
 - [Code of Conduct](CODE_OF_CONDUCT.md) — community guidelines.
 - [Security](SECURITY.md) — how to report a vulnerability.
 - [Issues](https://github.com/SrIruma/repoctx/issues) — report bugs and request features.

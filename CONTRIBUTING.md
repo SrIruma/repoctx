@@ -72,6 +72,27 @@ go test ./...
 - [ ] README and CHANGELOG updated when user-facing behaviour changes.
 - [ ] Description explains the what and the why of the change.
 
+## Versioning
+
+repoctx follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+Releases use plain tags (`vX.Y.Z`) with the version injected at build time via
+`-ldflags` (see `make release VERSION=vX.Y.Z`).
+
+While the project is on `0.x`, any release may break compatibility. Starting
+with `1.0.0` the policy is:
+
+| Kind of change | Version bump | Examples |
+|---|---|---|
+| Breaking | Major (`X.0.0`) | Contract changes — JSON schema or exit-code changes in `info --json` / `audit --json` (see `docs/contract.md`), removed flags or commands, changed defaults that break consumers. |
+| Feature | Minor (`x.Y.0`) | New adapters, new flags, new output — anything additive and non-breaking. |
+| Fix | Patch (`x.y.Z`) | Bug fixes, doc corrections, internal refactors. |
+
+The machine contract in `docs/contract.md` is frozen from `1.0.0` onward:
+changing the JSON schemas or exit codes requires a deliberate major bump.
+Golden tests in `internal/cli/testdata` pin the contract output; regenerate
+snapshots (`go test ./internal/cli -run TestGoldenJSON -update`) only as part
+of that major bump, with a CHANGELOG entry and release note to match.
+
 ## Getting help
 
 Open an issue for bugs and feature ideas, or ask questions in the discussions
