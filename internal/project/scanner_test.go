@@ -120,6 +120,7 @@ func TestScannerPoly5(t *testing.T) {
 		{"Gemfile", KindGemfile},
 		{"build.gradle", KindGradle},
 		{"composer.json", KindComposer},
+		{"meson.build", KindMeson},
 		{"pom.xml", KindMaven},
 	}
 	if len(p.Manifests) != len(want) {

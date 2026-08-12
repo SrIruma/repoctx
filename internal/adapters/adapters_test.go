@@ -224,3 +224,26 @@ func TestGradleAdapter(t *testing.T) {
 		t.Errorf("project references should be ignored: %v", md.Deps)
 	}
 }
+
+func TestMesonAdapter(t *testing.T) {
+	ad := mesonAdapter{}
+	md, err := ad.Read(fixture(t, "meson/meson.build"))
+	if err != nil {
+		t.Fatalf("read: %v", err)
+	}
+	want := map[string]string{
+		"setup":   "meson setup build",
+		"compile": "meson compile -C build",
+		"test":    "meson test -C build",
+	}
+	for name, cmd := range want {
+		if !hasCommand(md.Commands, name, cmd) {
+			t.Errorf("missing meson %q command (%q): %v", name, cmd, md.Commands)
+		}
+	}
+	for _, dep := range []string{"gtk+-3.0", "glib-2.0"} {
+		if !contains(md.Deps, dep) {
+			t.Errorf("missing dependency %q in %v", dep, md.Deps)
+		}
+	}
+}
