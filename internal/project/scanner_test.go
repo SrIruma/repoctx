@@ -71,3 +71,35 @@ func TestScannerReportsUnsupportedManifests(t *testing.T) {
 		return
 	}
 }
+
+func TestScannerPoly5(t *testing.T) {
+	root := filepath.Join("..", "..", "tests", "fixtures", "scanner", "poly5")
+	p, err := NewScanner(root).Scan()
+	if err != nil {
+		t.Fatalf("scan: %v", err)
+	}
+	want := []struct {
+		path string
+		kind ManifestKind
+	}{
+		{"CMakeLists.txt", KindCMake},
+		{"Gemfile", KindGemfile},
+		{"build.gradle", KindGradle},
+		{"composer.json", KindComposer},
+		{"pom.xml", KindMaven},
+	}
+	if len(p.Manifests) != len(want) {
+		t.Fatalf("expected %d manifests, got %d: %+v", len(want), len(p.Manifests), p.Manifests)
+	}
+	for i, w := range want {
+		if p.Manifests[i].Path != w.path {
+			t.Errorf("manifests[%d].Path = %q, want %q", i, p.Manifests[i].Path, w.path)
+		}
+		if p.Manifests[i].Kind != w.kind {
+			t.Errorf("manifests[%d].Kind = %q, want %q", i, p.Manifests[i].Kind, w.kind)
+		}
+	}
+	if len(p.DetectedOther) != 0 {
+		t.Fatalf("expected no detected-other, got %v", p.DetectedOther)
+	}
+}

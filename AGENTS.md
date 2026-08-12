@@ -16,7 +16,7 @@ The code is split into small, single-purpose packages:
 - `cmd/repoctx/` - CLI entry point.
 - `internal/cli/` - cobra commands (`info`, `generate`, `audit`, `workflow`) and version injection.
 - `internal/project/` - repository scanning and the manifest model.
-- `internal/adapters/` - one adapter per manifest format (npm, cargo, go, pyproject, make).
+- `internal/adapters/` - one adapter per manifest format (npm, cargo, go, pyproject, make, cmake, ruby, composer, maven, gradle).
 - `internal/markdown/` - marker-aware parsing and rendering of context files.
 - `internal/audit/` - rot checks and report scoring.
 - `tests/fixtures/` - fixture projects used by tests.
@@ -63,6 +63,10 @@ The code is split into small, single-purpose packages:
 | `cargo run` | `tests/fixtures/cargo/Cargo.toml` |
 | `cargo fmt --check` | `tests/fixtures/cargo/Cargo.toml` |
 | `cargo clippy` | `tests/fixtures/cargo/Cargo.toml` |
+| `cmake --build build --target build` | `tests/fixtures/cmake/CMakeLists.txt` |
+| `cmake --build build --target test` | `tests/fixtures/cmake/CMakeLists.txt` |
+| `composer run lint` | `tests/fixtures/composer/composer.json` |
+| `composer run test` | `tests/fixtures/composer/composer.json` |
 | `go build ./...` | `tests/fixtures/go/go.mod` |
 | `go test ./...` | `tests/fixtures/go/go.mod` |
 | `go vet ./...` | `tests/fixtures/go/go.mod` |
@@ -75,6 +79,9 @@ The code is split into small, single-purpose packages:
 | `npm run test` | `tests/fixtures/npm/package.json` |
 | `pytest` | `tests/fixtures/pyproject/pyproject.toml` |
 | `ruff check .` | `tests/fixtures/pyproject/pyproject.toml` |
+| `bundle exec puma` | `tests/fixtures/ruby/Gemfile` |
+| `bundle exec rails` | `tests/fixtures/ruby/Gemfile` |
+| `bundle exec rspec` | `tests/fixtures/ruby/Gemfile` |
 | `go build ./...` | `tests/fixtures/scanner/mono/backend/go.mod` |
 | `go test ./...` | `tests/fixtures/scanner/mono/backend/go.mod` |
 | `go vet ./...` | `tests/fixtures/scanner/mono/backend/go.mod` |
@@ -86,6 +93,7 @@ The code is split into small, single-purpose packages:
 | `cargo run` | `tests/fixtures/scanner/mono/tools/rust/Cargo.toml` |
 | `cargo fmt --check` | `tests/fixtures/scanner/mono/tools/rust/Cargo.toml` |
 | `cargo clippy` | `tests/fixtures/scanner/mono/tools/rust/Cargo.toml` |
+| `bundle exec rake` | `tests/fixtures/scanner/poly5/Gemfile` |
 
 ## Modules
 
@@ -97,11 +105,21 @@ The code is split into small, single-purpose packages:
 | `tests/fixtures/audit/healthy/Makefile` | Generic (Make) |  |
 | `tests/fixtures/audit/stale/package.json` | JavaScript/TypeScript |  |
 | `tests/fixtures/cargo/Cargo.toml` | Rust | anyhow, criterion, serde |
+| `tests/fixtures/cmake/CMakeLists.txt` | C/C++ | Boost, OpenSSL |
+| `tests/fixtures/composer/composer.json` | PHP | monolog/monolog, php, phpunit/phpunit |
 | `tests/fixtures/go/go.mod` | Go | github.com/spf13/cobra, github.com/stretchr/testify |
+| `tests/fixtures/gradle/build.gradle` | Gradle | com.fasterxml.jackson.core:jackson-databind:2.17.0, com.google.guava:guava:33.2.0-jre, org.junit.jupiter:junit-jupiter:5.10.2, org.projectlombok:lombok:1.18.32 |
 | `tests/fixtures/make/Makefile` | Generic (Make) |  |
+| `tests/fixtures/maven/pom.xml` | Java | junit:junit, org.springframework.boot:spring-boot-starter-web:3.2.0 |
 | `tests/fixtures/npm/package.json` | JavaScript/TypeScript | react, typescript |
 | `tests/fixtures/pyproject/pyproject.toml` | Python | click, requests |
+| `tests/fixtures/ruby/Gemfile` | Ruby | puma, rails, rspec |
 | `tests/fixtures/scanner/mono/backend/go.mod` | Go | github.com/spf13/cobra |
 | `tests/fixtures/scanner/mono/package.json` | JavaScript/TypeScript |  |
 | `tests/fixtures/scanner/mono/tools/rust/Cargo.toml` | Rust |  |
+| `tests/fixtures/scanner/poly5/CMakeLists.txt` | C/C++ |  |
+| `tests/fixtures/scanner/poly5/Gemfile` | Ruby | rake |
+| `tests/fixtures/scanner/poly5/build.gradle` | Gradle |  |
+| `tests/fixtures/scanner/poly5/composer.json` | PHP |  |
+| `tests/fixtures/scanner/poly5/pom.xml` | Java |  |
 <!-- repoctx:end -->

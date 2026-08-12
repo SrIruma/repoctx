@@ -11,6 +11,11 @@ const (
 	KindGo        ManifestKind = "go"
 	KindPyProject ManifestKind = "pyproject"
 	KindMake      ManifestKind = "make"
+	KindCMake     ManifestKind = "cmake"
+	KindGemfile   ManifestKind = "gemfile"
+	KindComposer  ManifestKind = "composer"
+	KindMaven     ManifestKind = "maven"
+	KindGradle    ManifestKind = "gradle"
 )
 
 // Command is a named project command (for example "test" -> "npm run test").
