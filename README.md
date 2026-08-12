@@ -173,6 +173,7 @@ make release VERSION=v0.4.0   # dist/repoctx_linux_amd64, repoctx_linux_arm64, r
 - [Contributing](CONTRIBUTING.md) — how to set up, branch, commit, and test.
 - [Changelog](CHANGELOG.md) — release history.
 - [Contract](docs/contract.md) — exit codes, JSON schemas and contract flags.
+- [Examples](docs/examples.md) — verified usage in every case (generated).
 - [Code of Conduct](CODE_OF_CONDUCT.md) — community guidelines.
 - [Security](SECURITY.md) — how to report a vulnerability.
 - [Issues](https://github.com/SrIruma/repoctx/issues) — report bugs and request features.

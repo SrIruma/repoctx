@@ -21,3 +21,16 @@ jobs:
       - run: go build ./...
       - run: go test ./...
       - run: go run ./cmd/repoctx audit . --check
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Regenerate the examples cookbook
+        run: make docs-examples
+      - name: Fail if the cookbook drifted
+        run: git diff --exit-code docs/examples.md
