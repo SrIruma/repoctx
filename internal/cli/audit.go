@@ -21,27 +21,30 @@ const (
 )
 
 func newAuditCmd() *cobra.Command {
-	var jsonOut bool
+	var jsonOut, check bool
 	cmd := &cobra.Command{
 		Use:   "audit [dir]",
 		Short: "Detect context rot in AGENTS.md / CLAUDE.md",
 		Long: "Checks the claims in your context files against the current state of the\n" +
 			"code: ghost commands claimed between repoctx markers and stale repository\n" +
-			"paths referenced anywhere in the file. Reports a health score per file.",
+			"paths referenced anywhere in the file. Reports a health score per file.\n" +
+			"With --check the command exits non-zero when any file fails, so it can\n" +
+			"gate merges in CI.",
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			dir := "."
 			if len(args) == 1 {
 				dir = args[0]
 			}
-			return runAudit(cmd, dir, jsonOut)
+			return runAudit(cmd, dir, jsonOut, check)
 		},
 	}
 	cmd.Flags().BoolVar(&jsonOut, "json", false, "output as JSON")
+	cmd.Flags().BoolVar(&check, "check", false, "exit non-zero when any file fails (CI gating)")
 	return cmd
 }
 
-func runAudit(cmd *cobra.Command, dir string, jsonOut bool) error {
+func runAudit(cmd *cobra.Command, dir string, jsonOut, check bool) error {
 	abs, err := filepath.Abs(dir)
 	if err != nil {
 		return err
@@ -74,10 +77,20 @@ func runAudit(cmd *cobra.Command, dir string, jsonOut bool) error {
 	if jsonOut {
 		enc := json.NewEncoder(cmd.OutOrStdout())
 		enc.SetIndent("", "  ")
-		return enc.Encode(reports)
+		if err := enc.Encode(reports); err != nil {
+			return err
+		}
+	} else {
+		for _, r := range reports {
+			printReport(cmd.OutOrStdout(), r)
+		}
 	}
-	for _, r := range reports {
-		printReport(cmd.OutOrStdout(), r)
+	if check {
+		for _, r := range reports {
+			if !r.Passed {
+				return &exitError{code: 1}
+			}
+		}
 	}
 	return nil
 }

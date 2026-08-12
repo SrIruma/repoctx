@@ -3,6 +3,7 @@ package cli
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -108,7 +109,7 @@ func TestAuditCLIHuman(t *testing.T) {
 	cmd := &cobra.Command{}
 	var buf bytes.Buffer
 	cmd.SetOut(&buf)
-	if err := runAudit(cmd, dir, false); err != nil {
+	if err := runAudit(cmd, dir, false, false); err != nil {
 		t.Fatalf("runAudit: %v", err)
 	}
 	out := buf.String()
@@ -122,7 +123,7 @@ func TestAuditCLIJSON(t *testing.T) {
 	cmd := &cobra.Command{}
 	var buf bytes.Buffer
 	cmd.SetOut(&buf)
-	if err := runAudit(cmd, dir, true); err != nil {
+	if err := runAudit(cmd, dir, true, false); err != nil {
 		t.Fatalf("runAudit: %v", err)
 	}
 	var reports []audit.Report
@@ -131,5 +132,101 @@ func TestAuditCLIJSON(t *testing.T) {
 	}
 	if len(reports) != 1 || reports[0].Score != 100 || !reports[0].Passed {
 		t.Errorf("expected one passing 100-score report, got %+v", reports)
+	}
+}
+
+func TestAuditCLICheckFails(t *testing.T) {
+	dir := filepath.Join("..", "..", "tests", "fixtures", "audit", "ghost")
+	cmd := &cobra.Command{}
+	cmd.SetOut(&bytes.Buffer{})
+	err := runAudit(cmd, dir, false, true)
+	var ee *exitError
+	if !errors.As(err, &ee) || ee.code != 1 {
+		t.Fatalf("expected *exitError{code:1}, got %v", err)
+	}
+}
+
+func TestAuditCLICheckPasses(t *testing.T) {
+	dir := filepath.Join("..", "..", "tests", "fixtures", "audit", "healthy")
+	cmd := &cobra.Command{}
+	cmd.SetOut(&bytes.Buffer{})
+	if err := runAudit(cmd, dir, false, true); err != nil {
+		t.Fatalf("expected nil error on healthy fixture, got %v", err)
+	}
+}
+
+func TestAuditCLICheckJSON(t *testing.T) {
+	dir := filepath.Join("..", "..", "tests", "fixtures", "audit", "ghost")
+	cmd := &cobra.Command{}
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	err := runAudit(cmd, dir, true, true)
+	var ee *exitError
+	if !errors.As(err, &ee) || ee.code != 1 {
+		t.Fatalf("expected *exitError{code:1}, got %v", err)
+	}
+	var reports []audit.Report
+	if err := json.Unmarshal(buf.Bytes(), &reports); err != nil {
+		t.Fatalf("invalid JSON output: %v\n%s", err, buf.String())
+	}
+	if reports[0].Passed {
+		t.Errorf("expected failing report in JSON output, got %+v", reports[0])
+	}
+}
+
+func TestExecuteAuditCheckExitCode(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		dir  string
+		want int
+	}{
+		{"failing fixture exits 1", filepath.Join("..", "..", "tests", "fixtures", "audit", "ghost"), 1},
+		{"healthy fixture exits 0", filepath.Join("..", "..", "tests", "fixtures", "audit", "healthy"), 0},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			root := NewRootCmd()
+			root.SetArgs([]string{"audit", tc.dir, "--check"})
+			var out, errBuf bytes.Buffer
+			if got := execute(root, &out, &errBuf); got != tc.want {
+				t.Errorf("execute exit code = %d, want %d\nstdout:\n%s\nstderr:\n%s", got, tc.want, out.String(), errBuf.String())
+			}
+		})
+	}
+}
+
+func TestWorkflowTemplateDefault(t *testing.T) {
+	cmd := &cobra.Command{}
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	if err := runWorkflow(cmd, nil); err != nil {
+		t.Fatalf("runWorkflow: %v", err)
+	}
+	out := buf.String()
+	for _, want := range []string{
+		"## Repo Context Maintenance",
+		"<!-- repoctx:start -->",
+		"<!-- repoctx:end -->",
+		"`AGENTS.md`",
+		"`repoctx generate .`",
+		"`repoctx audit . --check`",
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("template missing %q:\n%s", want, out)
+		}
+	}
+}
+
+func TestWorkflowTemplateMultipleFiles(t *testing.T) {
+	cmd := &cobra.Command{}
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	if err := runWorkflow(cmd, []string{"AGENTS.md", "CLAUDE.md"}); err != nil {
+		t.Fatalf("runWorkflow: %v", err)
+	}
+	out := buf.String()
+	for _, want := range []string{"`AGENTS.md` and `CLAUDE.md`", "--file AGENTS.md --file CLAUDE.md"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("template missing %q:\n%s", want, out)
+		}
 	}
 }
