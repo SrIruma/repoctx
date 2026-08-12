@@ -33,6 +33,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `meson compile -C build` and `meson test -C build`, and dependencies
   from `dependency(...)` calls) instead of being reported as
   "adapter pending".
+- Workspace (npm/pnpm) layouts are covered by a fixture and tests that pin
+  the Commands-table policy: commands are attributed per manifest, the same
+  command from different packages is disambiguated by the Source column, and
+  no `(command, source)` row is ever duplicated. See the "Workspaces"
+  section of the README.
 
 ## [v0.3.0] - 2026-08-12
 

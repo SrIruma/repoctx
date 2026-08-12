@@ -63,6 +63,19 @@ files = ["AGENTS.md", "CLAUDE.md"]  # default context files for generate
 - `--config <path>` reads the config from a specific location instead of
   `<dir>/repoctx.toml`.
 
+## Workspaces
+
+Workspace (monorepo) layouts — npm/pnpm workspaces, cargo workspaces —
+are scanned naturally: every manifest in the tree is detected, including the
+workspace root and each member package. Commands are attributed per manifest:
+
+- the root `package.json` contributes its own scripts, and each member
+  package contributes its own;
+- the same command string from different manifests (e.g. `npm run test` at
+  the root and inside `packages/app`) is intentional and disambiguated by the
+  Source column of the Commands table;
+- a given `(command, source)` row is never emitted twice.
+
 ## Demo
 
 Inspect what a monorepo looks like to repoctx:
