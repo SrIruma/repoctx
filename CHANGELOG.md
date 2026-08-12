@@ -21,6 +21,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `vendor`, ...) are always preserved.
 - `generate` uses the `files` list from `repoctx.toml` when `--file` is not
   given (falling back to `AGENTS.md`).
+- `generate --dry-run` previews what a generation would change without
+  writing any file: it reports `would update <file>` or
+  `<file> is up to date` and exits 0 either way.
+- `info` surfaces per-manifest extraction failures instead of hiding them:
+  `info --json` gains an `errors` field per manifest and the human output
+  prints a `!` warning per failed manifest. A corrupt manifest is a soft
+  failure: the scan result stays usable and the exit code stays 0.
 
 ## [v0.3.0] - 2026-08-12
 
