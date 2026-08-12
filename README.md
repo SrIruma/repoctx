@@ -9,6 +9,8 @@
 
 repoctx keeps your AI coding-agent context files (`AGENTS.md`, `CLAUDE.md`) truthful. It scans a repository, extracts facts from the real code — build/test commands, module structure, dependencies — and uses them to regenerate the factual sections of your context files, preserving anything a human wrote.
 
+![repoctx demo](docs/demo.gif)
+
 ## Why
 
 Context files rot. A README mentions a `make release` target that no longer exists; `AGENTS.md` lists `backend/` as a path that was renamed months ago. Agents read those files and act on stale information. repoctx is the source of truth for everything that can be derived from the repository itself.
