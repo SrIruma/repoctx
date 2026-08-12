@@ -33,7 +33,7 @@ make install # -> $GOBIN/repoctx
 | Command | Description |
 |---|---|
 | `repoctx info [dir]` | Detect manifests and extract facts from a repository. Manifests that fail to parse are kept in the report with a `!` warning (and an `errors` field in `--json`). |
-| `repoctx generate [dir]` | Regenerate the code-derived sections of `AGENTS.md` / `CLAUDE.md` between repoctx markers. `--dry-run` previews what would change without writing. |
+| `repoctx generate [dir]` | Regenerate the code-derived sections of a context file (`AGENTS.md` by default, or the `files` from `repoctx.toml` / `--file`) between repoctx markers. `--dry-run` previews what would change without writing. |
 | `repoctx audit [dir]` | Detect context rot: stale paths and ghost commands, with a health score. `--check` exits non-zero on failure for CI gating. |
 | `repoctx workflow [file ...]` | Print a paste-ready block telling agents how to keep the context file truthful. |
 
@@ -127,6 +127,25 @@ It composes with `--json` for machine-readable failures:
 3. **Generate** — the facts are written between `<!-- repoctx:start -->` / `<!-- repoctx:end -->` markers. Anything outside the markers — your prose, conventions, warnings — is left untouched.
 4. **Audit** — checks the claims in your context files against the current state of the code and scores the drift.
 
+## Supported manifests
+
+Every ecosystem detected by the scanner has a first-class adapter — nothing is
+"adapter pending" anymore.
+
+| Manifest | Language | Commands | Dependencies |
+|---|---|---|---|
+| `go.mod` | Go | `go build ./...`, `go test ./...`, `go vet ./...`, `gofmt -l .` | Go modules |
+| `package.json` | JavaScript/TypeScript | npm scripts (`npm run build`, …) | npm packages |
+| `Cargo.toml` | Rust | `cargo build`, `cargo test`, `cargo run`, `cargo fmt --check`, `cargo clippy` | crates |
+| `pyproject.toml` | Python | `pytest`, `ruff check .` | Python packages |
+| `Makefile` | Generic (Make) | make targets | — |
+| `CMakeLists.txt` | C/C++ | `cmake --build` targets | libraries |
+| `meson.build` | C/C++ | `meson setup`, `meson compile`, `meson test` | libraries |
+| `Gemfile` | Ruby | `bundle exec …` | gems |
+| `composer.json` | PHP | `composer run …` | composer packages |
+| `pom.xml` | Java (Maven) | Maven targets | artifacts |
+| `build.gradle` | Gradle | Gradle targets | artifacts |
+
 ## Markers
 
 ```markdown
@@ -145,7 +164,7 @@ It composes with `--json` for machine-readable failures:
 make test      # go test ./...
 make build     # bin/repoctx
 make install   # $GOBIN/repoctx
-make release VERSION=v0.3.0   # dist/repoctx_linux_amd64, repoctx_linux_arm64, repoctx_windows_amd64.exe + SHA256SUMS.txt
+make release VERSION=v0.4.0   # dist/repoctx_linux_amd64, repoctx_linux_arm64, repoctx_windows_amd64.exe + SHA256SUMS.txt
 ```
 
 ## Community
