@@ -88,11 +88,6 @@ The code is split into small, single-purpose packages:
 | `gofmt -l .` | `tests/fixtures/scanner/mono/backend/go.mod` |
 | `npm run build` | `tests/fixtures/scanner/mono/package.json` |
 | `npm run test` | `tests/fixtures/scanner/mono/package.json` |
-| `cargo build` | `tests/fixtures/scanner/mono/tools/rust/Cargo.toml` |
-| `cargo test` | `tests/fixtures/scanner/mono/tools/rust/Cargo.toml` |
-| `cargo run` | `tests/fixtures/scanner/mono/tools/rust/Cargo.toml` |
-| `cargo fmt --check` | `tests/fixtures/scanner/mono/tools/rust/Cargo.toml` |
-| `cargo clippy` | `tests/fixtures/scanner/mono/tools/rust/Cargo.toml` |
 | `bundle exec rake` | `tests/fixtures/scanner/poly5/Gemfile` |
 
 ## Modules
@@ -116,7 +111,6 @@ The code is split into small, single-purpose packages:
 | `tests/fixtures/ruby/Gemfile` | Ruby | puma, rails, rspec |
 | `tests/fixtures/scanner/mono/backend/go.mod` | Go | github.com/spf13/cobra |
 | `tests/fixtures/scanner/mono/package.json` | JavaScript/TypeScript |  |
-| `tests/fixtures/scanner/mono/tools/rust/Cargo.toml` | Rust |  |
 | `tests/fixtures/scanner/poly5/CMakeLists.txt` | C/C++ |  |
 | `tests/fixtures/scanner/poly5/Gemfile` | Ruby | rake |
 | `tests/fixtures/scanner/poly5/build.gradle` | Gradle |  |

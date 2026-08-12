@@ -72,6 +72,40 @@ func TestScannerReportsUnsupportedManifests(t *testing.T) {
 	}
 }
 
+func TestScannerMaxDepthLimitsManifests(t *testing.T) {
+	root := filepath.Join("..", "..", "tests", "fixtures", "scanner", "mono")
+	sc := NewScanner(root)
+	sc.MaxDepth = 1
+	p, err := sc.Scan()
+	if err != nil {
+		t.Fatalf("scan: %v", err)
+	}
+	if len(p.Manifests) != 1 || p.Manifests[0].Path != "package.json" {
+		t.Errorf("MaxDepth 1: expected only root package.json, got %+v", p.Manifests)
+	}
+}
+
+func TestScannerSkipDirsDoesNotLeakAcrossScans(t *testing.T) {
+	root := filepath.Join("..", "..", "tests", "fixtures", "scanner", "mono")
+
+	sc := NewScanner(root)
+	sc.SkipDirs = []string{"backend"}
+	if _, err := sc.Scan(); err != nil {
+		t.Fatalf("scan with SkipDirs: %v", err)
+	}
+
+	clean, err := NewScanner(root).Scan()
+	if err != nil {
+		t.Fatalf("scan without SkipDirs: %v", err)
+	}
+	for _, m := range clean.Manifests {
+		if m.Path == "backend/go.mod" {
+			return
+		}
+	}
+	t.Error("backend/go.mod missing: SkipDirs from the previous scan leaked globally")
+}
+
 func TestScannerPoly5(t *testing.T) {
 	root := filepath.Join("..", "..", "tests", "fixtures", "scanner", "poly5")
 	p, err := NewScanner(root).Scan()

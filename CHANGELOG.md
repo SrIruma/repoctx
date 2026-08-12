@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- New `repoctx.toml` config file: `max_depth`, `skip_dirs` and `files` tune
+  scanning and the default context files without per-invocation flags. Loaded
+  from the target directory, or from an explicit path via `--config`. Values
+  merge with the CLI flags in `flags > config > defaults` precedence order.
+- `--max-depth` flag on `info`, `generate` and `audit` to limit how far the
+  scanner descends (default 6; a non-positive value is an error). The depth
+  limit now also applies to files, not only to directory descent.
+- `--skip-dirs` (repeatable) flag on `info`, `generate` and `audit` to add
+  directories to the skip list; built-in skips (`.git`, `node_modules`,
+  `vendor`, ...) are always preserved.
+- `generate` uses the `files` list from `repoctx.toml` when `--file` is not
+  given (falling back to `AGENTS.md`).
+
 ## [v0.3.0] - 2026-08-12
 
 ### Added

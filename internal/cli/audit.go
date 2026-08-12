@@ -22,6 +22,7 @@ const (
 
 func newAuditCmd() *cobra.Command {
 	var jsonOut, check bool
+	var opts scanFlags
 	cmd := &cobra.Command{
 		Use:   "audit [dir]",
 		Short: "Detect context rot in AGENTS.md / CLAUDE.md",
@@ -36,20 +37,32 @@ func newAuditCmd() *cobra.Command {
 			if len(args) == 1 {
 				dir = args[0]
 			}
-			return runAudit(cmd, dir, jsonOut, check)
+			flags := scanFlags{
+				maxDepth:    opts.maxDepth,
+				skipDirs:    opts.skipDirs,
+				configPath:  opts.configPath,
+				maxDepthSet: cmd.Flags().Changed("max-depth"),
+				skipDirsSet: cmd.Flags().Changed("skip-dirs"),
+			}
+			res, err := flags.resolve(dir)
+			if err != nil {
+				return err
+			}
+			return runAudit(cmd, dir, jsonOut, check, res)
 		},
 	}
 	cmd.Flags().BoolVar(&jsonOut, "json", false, "output as JSON")
 	cmd.Flags().BoolVar(&check, "check", false, "exit non-zero when any file fails (CI gating)")
+	addScanFlags(cmd, &opts)
 	return cmd
 }
 
-func runAudit(cmd *cobra.Command, dir string, jsonOut, check bool) error {
+func runAudit(cmd *cobra.Command, dir string, jsonOut, check bool, opts resolved) error {
 	abs, err := filepath.Abs(dir)
 	if err != nil {
 		return err
 	}
-	p, err := loadProject(abs)
+	p, err := loadProject(abs, opts)
 	if err != nil {
 		return err
 	}

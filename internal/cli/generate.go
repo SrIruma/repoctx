@@ -14,6 +14,7 @@ import (
 
 func newGenerateCmd() *cobra.Command {
 	var files []string
+	var opts scanFlags
 	cmd := &cobra.Command{
 		Use:   "generate [dir]",
 		Short: "Regenerate the code-derived sections of context files",
@@ -26,20 +27,34 @@ func newGenerateCmd() *cobra.Command {
 			if len(args) == 1 {
 				dir = args[0]
 			}
-			return runGenerate(cmd, dir, files)
+			flags := scanFlags{
+				maxDepth:    opts.maxDepth,
+				skipDirs:    opts.skipDirs,
+				configPath:  opts.configPath,
+				files:       files,
+				maxDepthSet: cmd.Flags().Changed("max-depth"),
+				skipDirsSet: cmd.Flags().Changed("skip-dirs"),
+				filesSet:    cmd.Flags().Changed("file"),
+			}
+			res, err := flags.resolve(dir)
+			if err != nil {
+				return err
+			}
+			return runGenerate(cmd, dir, res.files, res)
 		},
 	}
-	cmd.Flags().StringSliceVar(&files, "file", []string{"AGENTS.md"},
+	cmd.Flags().StringSliceVar(&files, "file", nil,
 		"context file to update (repeatable, default AGENTS.md)")
+	addScanFlags(cmd, &opts)
 	return cmd
 }
 
-func runGenerate(cmd *cobra.Command, dir string, files []string) error {
+func runGenerate(cmd *cobra.Command, dir string, files []string, opts resolved) error {
 	abs, err := filepath.Abs(dir)
 	if err != nil {
 		return err
 	}
-	p, err := loadProject(abs)
+	p, err := loadProject(abs, opts)
 	if err != nil {
 		return err
 	}

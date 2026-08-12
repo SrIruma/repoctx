@@ -37,7 +37,31 @@ make install # -> $GOBIN/repoctx
 | `repoctx audit [dir]` | Detect context rot: stale paths and ghost commands, with a health score. `--check` exits non-zero on failure for CI gating. |
 | `repoctx workflow [file ...]` | Print a paste-ready block telling agents how to keep the context file truthful. |
 
-Run `repoctx <command> --help` for full usage. Every command supports `--json`.
+Run `repoctx <command> --help` for full usage. `info`, `generate` and `audit`
+share the same scan tuning flags: `--max-depth` limits how far repoctx
+descends, `--skip-dirs` (repeatable) adds directories to skip on top of the
+built-ins, and `--config` points at an explicit `repoctx.toml`.
+
+## Configuration
+
+repoctx reads an optional `repoctx.toml` from the target directory. Values
+can come from three layers, in precedence order: command-line flags, then the
+config file, then built-in defaults.
+
+```toml
+# repoctx.toml
+max_depth = 4               # how deep the scanner descends
+skip_dirs = ["third_party"] # extra directories to skip (built-ins always apply)
+files = ["AGENTS.md", "CLAUDE.md"]  # default context files for generate
+```
+
+- `--max-depth` and `--skip-dirs` on the command line win over the config
+  file; the built-in skip list (`.git`, `node_modules`, `vendor`, …) is
+  always preserved.
+- `generate` uses `files` from the config when no `--file` is given
+  (otherwise `AGENTS.md`).
+- `--config <path>` reads the config from a specific location instead of
+  `<dir>/repoctx.toml`.
 
 ## Demo
 
