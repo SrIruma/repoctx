@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v1.0.0] - 2026-08-12
+
 ### Added
 
 - `docs/contract.md` documents the machine contract: exit codes (`0`/`1`),
@@ -24,6 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   file, new flags, JSON schema changes and the exit-code contract.
 - CONTRIBUTING.md defines the post-1.0 semver policy: breaking changes
   (including contract changes) → major, features → minor, fixes → patch.
+
+From this release the machine contract (exit codes and `--json` schemas in
+`docs/contract.md`) is frozen: contract changes require a major version bump.
 
 ## [v0.4.0] - 2026-08-12
 
@@ -138,7 +143,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   meson) are detected and reported.
 - CI workflow (`go vet`, `go build`, `go test`) on push to `main` and PRs.
 
-[Unreleased]: https://github.com/SrIruma/repoctx/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/SrIruma/repoctx/compare/v1.0.0...HEAD
+[v1.0.0]: https://github.com/SrIruma/repoctx/compare/v0.4.0...v1.0.0
 [v0.4.0]: https://github.com/SrIruma/repoctx/compare/v0.3.0...v0.4.0
 [v0.3.0]: https://github.com/SrIruma/repoctx/compare/v0.2.0...v0.3.0
 [v0.2.0]: https://github.com/SrIruma/repoctx/compare/v0.1.0...v0.2.0

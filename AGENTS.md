@@ -25,7 +25,7 @@ The code is split into small, single-purpose packages:
 
 - Conventional commits (`feat:`, `fix:`, `docs:`, `test:`, `chore:`).
 - `main` is always releasable; work in feature branches.
-- Releases use plain tags (`v0.4.0`), injected into `internal/cli.version` via `-ldflags`.
+- Releases use plain tags (`v1.0.0`), injected into `internal/cli.version` via `-ldflags`.
 - Public-facing code and docs in English; working notes may be in Spanish.
 - Commands are atomic and factual: `generate` never touches human-written content outside markers.
 - This repository is dogfooded: the Commands/Modules tables below are generated
@@ -45,6 +45,7 @@ The code is split into small, single-purpose packages:
 | `make all` | `Makefile` |
 | `make build` | `Makefile` |
 | `make clean` | `Makefile` |
+| `make docs-examples` | `Makefile` |
 | `make install` | `Makefile` |
 | `make release` | `Makefile` |
 | `make test` | `Makefile` |
@@ -85,6 +86,7 @@ The code is split into small, single-purpose packages:
 | `bundle exec puma` | `tests/fixtures/ruby/Gemfile` |
 | `bundle exec rails` | `tests/fixtures/ruby/Gemfile` |
 | `bundle exec rspec` | `tests/fixtures/ruby/Gemfile` |
+| `npm run test` | `tests/fixtures/scanner/corrupt/package.json` |
 | `go build ./...` | `tests/fixtures/scanner/mono/backend/go.mod` |
 | `go test ./...` | `tests/fixtures/scanner/mono/backend/go.mod` |
 | `go vet ./...` | `tests/fixtures/scanner/mono/backend/go.mod` |
@@ -122,6 +124,8 @@ The code is split into small, single-purpose packages:
 | `tests/fixtures/npm/package.json` | JavaScript/TypeScript | react, typescript |
 | `tests/fixtures/pyproject/pyproject.toml` | Python | click, requests |
 | `tests/fixtures/ruby/Gemfile` | Ruby | puma, rails, rspec |
+| `tests/fixtures/scanner/corrupt/broken/package.json` |  |  |
+| `tests/fixtures/scanner/corrupt/package.json` | JavaScript/TypeScript | typescript |
 | `tests/fixtures/scanner/mono/backend/go.mod` | Go | github.com/spf13/cobra |
 | `tests/fixtures/scanner/mono/package.json` | JavaScript/TypeScript |  |
 | `tests/fixtures/scanner/poly5/CMakeLists.txt` | C/C++ |  |
