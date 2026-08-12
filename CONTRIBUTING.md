@@ -62,6 +62,11 @@ go test ./...
 - `repoctx audit . --check` is the CI-gating workflow: it exits non-zero when
   a context file fails, so it can block merges when `AGENTS.md` / `CLAUDE.md`
   drift from the code. This repository gates itself with it.
+- CI also regenerates the repo's own `AGENTS.md` (`repoctx generate .`) and
+  fails if it produces a diff. `audit` catches *rot* (claims that lie); this
+  gate catches *omissions* (new commands or modules not yet in the tables).
+  After changing scripts, manifests, dependencies or code layout, run
+  `repoctx generate .` and commit the regenerated `AGENTS.md` in the same PR.
 
 ## Pull request checklist
 
