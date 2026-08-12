@@ -40,7 +40,8 @@ make install # -> $GOBIN/repoctx
 Run `repoctx <command> --help` for full usage. `info`, `generate` and `audit`
 share the same scan tuning flags: `--max-depth` limits how far repoctx
 descends, `--skip-dirs` (repeatable) adds directories to skip on top of the
-built-ins, and `--config` points at an explicit `repoctx.toml`.
+built-ins, and `--config` points at an explicit `repoctx.toml`. Exit codes and
+the `--json` output schemas are part of the [contract](docs/contract.md).
 
 ## Configuration
 
@@ -171,6 +172,7 @@ make release VERSION=v0.4.0   # dist/repoctx_linux_amd64, repoctx_linux_arm64, r
 
 - [Contributing](CONTRIBUTING.md) — how to set up, branch, commit, and test.
 - [Changelog](CHANGELOG.md) — release history.
+- [Contract](docs/contract.md) — exit codes, JSON schemas and contract flags.
 - [Code of Conduct](CODE_OF_CONDUCT.md) — community guidelines.
 - [Security](SECURITY.md) — how to report a vulnerability.
 - [Issues](https://github.com/SrIruma/repoctx/issues) — report bugs and request features.
