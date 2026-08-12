@@ -2,12 +2,19 @@
 
 ## What is repoctx
 
-repoctx is a Go CLI that keeps AI coding-agent context files (`AGENTS.md`, `CLAUDE.md`) truthful. It scans a repository, extracts facts from real code, regenerates the code-derived sections of context files between markers, and audits context files for rot (stale paths, ghost commands).
+repoctx keeps the context files your AI agents read honest. Instead of trusting
+a hand-maintained `AGENTS.md` or `CLAUDE.md` that slowly drifts out of date, it
+scans the real code, extracts the commands and module structure as facts, and
+regenerates those code-derived sections between its markers. It also audits the
+file for rot — ghost commands and stale paths — so you always know when the
+context is lying.
 
 ## Structure
 
+The code is split into small, single-purpose packages:
+
 - `cmd/repoctx/` - CLI entry point.
-- `internal/cli/` - cobra commands (`info`, `generate`, `audit`) and version injection.
+- `internal/cli/` - cobra commands (`info`, `generate`, `audit`, `workflow`) and version injection.
 - `internal/project/` - repository scanning and the manifest model.
 - `internal/adapters/` - one adapter per manifest format (npm, cargo, go, pyproject, make).
 - `internal/markdown/` - marker-aware parsing and rendering of context files.
@@ -18,9 +25,17 @@ repoctx is a Go CLI that keeps AI coding-agent context files (`AGENTS.md`, `CLAU
 
 - Conventional commits (`feat:`, `fix:`, `docs:`, `test:`, `chore:`).
 - `main` is always releasable; work in feature branches.
-- Releases use plain tags (`v0.0.1`), injected into `internal/cli.version` via `-ldflags`.
+- Releases use plain tags (`v0.2.0`), injected into `internal/cli.version` via `-ldflags`.
 - Public-facing code and docs in English; working notes may be in Spanish.
 - Commands are atomic and factual: `generate` never touches human-written content outside markers.
+- This repository is dogfooded: the Commands/Modules tables below are generated
+  by repoctx between the markers — never hand-edit them. After changing
+  scripts, manifests, dependencies, or code layout, regenerate with
+  `repoctx generate .` and verify with `repoctx audit . --check`.
+- Development quickstart: `make test`, `make build`; before committing run
+  `go vet ./...` and `gofmt -l .`. See CONTRIBUTING.md.
+- In the Commands table, "Source" is the manifest that triggered the adapter —
+  e.g. `go vet ./...` is an adapter convention, not a literal `go.mod` key.
 
 <!-- repoctx:start -->
 ## Commands

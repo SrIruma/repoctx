@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `repoctx audit --check` exits non-zero when any audited file fails, turning
+  the health report into a CI gate that blocks merges when context files rot.
+  Works combined with `--json` for machine-readable failures.
+- `repoctx workflow [file ...]` prints a paste-ready block for the
+  human-written section of a context file. It tells coding agents to regenerate
+  the repoctx tables after code changes and to gate on
+  `repoctx audit . --check`, so the file stays truthful by convention, not by
+  luck.
+
 ### Fixed
 
 - `audit` no longer flags `AGENTS.md` / `CLAUDE.md` or Go symbols such as

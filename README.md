@@ -32,7 +32,8 @@ make install # -> $GOBIN/repoctx
 |---|---|
 | `repoctx info [dir]` | Detect manifests and extract facts from a repository. |
 | `repoctx generate [dir]` | Regenerate the code-derived sections of `AGENTS.md` / `CLAUDE.md` between repoctx markers. |
-| `repoctx audit [dir]` | Detect context rot: stale paths and ghost commands, with a health score. |
+| `repoctx audit [dir]` | Detect context rot: stale paths and ghost commands, with a health score. `--check` exits non-zero on failure for CI gating. |
+| `repoctx workflow [file ...]` | Print a paste-ready block telling agents how to keep the context file truthful. |
 
 Run `repoctx <command> --help` for full usage. Every command supports `--json`.
 
@@ -55,6 +56,23 @@ $ repoctx audit tests/fixtures/audit/healthy
 PASS  /path/to/audit/healthy/AGENTS.md  score 100/100
   ok  commands: 3 commands claimed
   ok  paths: all referenced paths exist
+```
+
+## Use in CI
+
+Gate merges on context truth. `--check` exits non-zero when any audited file
+fails, so a job can block a pull request when `AGENTS.md` / `CLAUDE.md` drift
+from the code:
+
+```yaml
+# .github/workflows/ci.yml
+- run: repoctx audit . --check
+```
+
+It composes with `--json` for machine-readable failures:
+
+```yaml
+- run: repoctx audit . --check --json
 ```
 
 ## How it works
@@ -82,7 +100,7 @@ PASS  /path/to/audit/healthy/AGENTS.md  score 100/100
 make test      # go test ./...
 make build     # bin/repoctx
 make install   # $GOBIN/repoctx
-make release VERSION=v0.1.0   # dist/repoctx_linux_amd64, repoctx_linux_arm64, repoctx_windows_amd64.exe + SHA256SUMS.txt
+make release VERSION=v0.2.0   # dist/repoctx_linux_amd64, repoctx_linux_arm64, repoctx_windows_amd64.exe + SHA256SUMS.txt
 ```
 
 ## Community
