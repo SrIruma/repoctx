@@ -102,7 +102,7 @@ It composes with `--json` for machine-readable failures:
 make test      # go test ./...
 make build     # bin/repoctx
 make install   # $GOBIN/repoctx
-make release VERSION=v0.2.0   # dist/repoctx_linux_amd64, repoctx_linux_arm64, repoctx_windows_amd64.exe + SHA256SUMS.txt
+make release VERSION=v0.3.0   # dist/repoctx_linux_amd64, repoctx_linux_arm64, repoctx_windows_amd64.exe + SHA256SUMS.txt
 ```
 
 ## Community
