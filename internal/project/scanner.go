@@ -65,7 +65,10 @@ func NewScanner(root string) *Scanner {
 // Scan walks the tree and returns the detected Project.
 func (s *Scanner) Scan() (*Project, error) {
 	p := &Project{Root: s.Root}
-	skip := defaultSkipDirs
+	skip := make(map[string]bool, len(defaultSkipDirs)+len(s.SkipDirs))
+	for d := range defaultSkipDirs {
+		skip[d] = true
+	}
 	for _, d := range s.SkipDirs {
 		skip[d] = true
 	}
@@ -100,6 +103,10 @@ func (s *Scanner) Scan() (*Project, error) {
 		rel, rerr := filepath.Rel(s.Root, path)
 		if rerr != nil {
 			return rerr
+		}
+		depth := strings.Count(filepath.ToSlash(rel), "/") + 1
+		if depth > maxDepth {
+			return nil
 		}
 		if kind, ok := manifestKinds[name]; ok {
 			p.Manifests = append(p.Manifests, &Manifest{

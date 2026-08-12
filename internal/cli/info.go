@@ -3,7 +3,7 @@ package cli
 import (
 	"encoding/json"
 	"fmt"
-	"os"
+	"io"
 	"path/filepath"
 	"strings"
 
@@ -15,6 +15,7 @@ import (
 
 func newInfoCmd() *cobra.Command {
 	var jsonOut bool
+	var opts scanFlags
 	cmd := &cobra.Command{
 		Use:   "info [dir]",
 		Short: "Detect manifests and extract facts from a repository",
@@ -24,33 +25,48 @@ func newInfoCmd() *cobra.Command {
 			if len(args) == 1 {
 				dir = args[0]
 			}
-			return runInfo(dir, jsonOut)
+			flags := scanFlags{
+				maxDepth:    opts.maxDepth,
+				skipDirs:    opts.skipDirs,
+				configPath:  opts.configPath,
+				maxDepthSet: cmd.Flags().Changed("max-depth"),
+				skipDirsSet: cmd.Flags().Changed("skip-dirs"),
+			}
+			res, err := flags.resolve(dir)
+			if err != nil {
+				return err
+			}
+			return runInfo(cmd, dir, jsonOut, res)
 		},
 	}
 	cmd.Flags().BoolVar(&jsonOut, "json", false, "output as JSON")
+	addScanFlags(cmd, &opts)
 	return cmd
 }
 
-func runInfo(dir string, jsonOut bool) error {
+func runInfo(cmd *cobra.Command, dir string, jsonOut bool, opts resolved) error {
 	abs, err := filepath.Abs(dir)
 	if err != nil {
 		return err
 	}
-	p, err := loadProject(abs)
+	p, err := loadProject(abs, opts)
 	if err != nil {
 		return err
 	}
+	w := cmd.OutOrStdout()
 	if jsonOut {
-		return printJSON(p)
+		return printJSON(w, p)
 	}
-	return printHuman(abs, p)
+	return printHuman(w, abs, p)
 }
 
 // loadProject scans dir and enriches every manifest with the facts extracted
 // by its adapter. Extraction is best-effort: unreadable manifests are kept as
 // detected but without facts.
-func loadProject(dir string) (*project.Project, error) {
+func loadProject(dir string, opts resolved) (*project.Project, error) {
 	sc := project.NewScanner(dir)
+	sc.MaxDepth = opts.maxDepth
+	sc.SkipDirs = opts.skipDirs
 	p, err := sc.Scan()
 	if err != nil {
 		return nil, err
@@ -71,28 +87,28 @@ func loadProject(dir string) (*project.Project, error) {
 	return p, nil
 }
 
-func printJSON(p *project.Project) error {
-	enc := json.NewEncoder(os.Stdout)
+func printJSON(w io.Writer, p *project.Project) error {
+	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
 	return enc.Encode(p)
 }
 
-func printHuman(root string, p *project.Project) error {
+func printHuman(w io.Writer, root string, p *project.Project) error {
 	if len(p.Manifests) == 0 && len(p.DetectedOther) == 0 {
-		fmt.Println("No manifests detected in", root)
+		fmt.Fprintf(w, "No manifests detected in %s\n", root)
 		return nil
 	}
-	fmt.Printf("Detected manifests in %s:\n", root)
+	fmt.Fprintf(w, "Detected manifests in %s:\n", root)
 	for _, m := range p.Manifests {
 		names := make([]string, 0, len(m.Commands))
 		for _, c := range m.Commands {
 			names = append(names, c.Name)
 		}
-		fmt.Printf("  %-28s %-10s %-22s commands: [%s]  (%d deps)\n",
+		fmt.Fprintf(w, "  %-28s %-10s %-22s commands: [%s]  (%d deps)\n",
 			m.Path, m.Kind, m.Language, strings.Join(names, ", "), len(m.Deps))
 	}
 	for _, o := range p.DetectedOther {
-		fmt.Printf("  ! %s\n", o)
+		fmt.Fprintf(w, "  ! %s\n", o)
 	}
 	return nil
 }

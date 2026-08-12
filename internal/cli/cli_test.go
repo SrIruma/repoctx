@@ -35,7 +35,7 @@ func TestGenerateRoundTrip(t *testing.T) {
 		markdown.StartMarker+"\n| stale |\n"+markdown.EndMarker+"\n")
 	cmd := &cobra.Command{}
 	cmd.SetOut(&bytes.Buffer{})
-	if err := runGenerate(cmd, dir, []string{"AGENTS.md"}); err != nil {
+	if err := runGenerate(cmd, dir, []string{"AGENTS.md"}, resolved{}); err != nil {
 		t.Fatalf("runGenerate: %v", err)
 	}
 	data, err := os.ReadFile(filepath.Join(dir, "AGENTS.md"))
@@ -64,7 +64,7 @@ func TestGenerateModulesRoundTripKeepsCommandsOnly(t *testing.T) {
 		markdown.StartMarker+"\n| stale |\n"+markdown.EndMarker+"\n")
 	cmd := &cobra.Command{}
 	cmd.SetOut(&bytes.Buffer{})
-	if err := runGenerate(cmd, dir, []string{"AGENTS.md"}); err != nil {
+	if err := runGenerate(cmd, dir, []string{"AGENTS.md"}, resolved{}); err != nil {
 		t.Fatalf("runGenerate: %v", err)
 	}
 	data, err := os.ReadFile(filepath.Join(dir, "AGENTS.md"))
@@ -84,7 +84,7 @@ func TestGenerateCreatesMissingFile(t *testing.T) {
 	dir := writeTestProject(t, "")
 	cmd := &cobra.Command{}
 	cmd.SetOut(&bytes.Buffer{})
-	if err := runGenerate(cmd, dir, []string{"CLAUDE.md"}); err != nil {
+	if err := runGenerate(cmd, dir, []string{"CLAUDE.md"}, resolved{}); err != nil {
 		t.Fatalf("runGenerate: %v", err)
 	}
 	data, err := os.ReadFile(filepath.Join(dir, "CLAUDE.md"))
@@ -99,7 +99,7 @@ func TestGenerateCreatesMissingFile(t *testing.T) {
 func TestGenerateFailsWithoutMarkers(t *testing.T) {
 	dir := writeTestProject(t, "# no markers here")
 	cmd := &cobra.Command{}
-	if err := runGenerate(cmd, dir, []string{"AGENTS.md"}); err == nil {
+	if err := runGenerate(cmd, dir, []string{"AGENTS.md"}, resolved{}); err == nil {
 		t.Fatal("expected error for a file without markers")
 	}
 }
@@ -109,7 +109,7 @@ func TestAuditCLIHuman(t *testing.T) {
 	cmd := &cobra.Command{}
 	var buf bytes.Buffer
 	cmd.SetOut(&buf)
-	if err := runAudit(cmd, dir, false, false); err != nil {
+	if err := runAudit(cmd, dir, false, false, resolved{}); err != nil {
 		t.Fatalf("runAudit: %v", err)
 	}
 	out := buf.String()
@@ -123,7 +123,7 @@ func TestAuditCLIJSON(t *testing.T) {
 	cmd := &cobra.Command{}
 	var buf bytes.Buffer
 	cmd.SetOut(&buf)
-	if err := runAudit(cmd, dir, true, false); err != nil {
+	if err := runAudit(cmd, dir, true, false, resolved{}); err != nil {
 		t.Fatalf("runAudit: %v", err)
 	}
 	var reports []audit.Report
@@ -139,7 +139,7 @@ func TestAuditCLICheckFails(t *testing.T) {
 	dir := filepath.Join("..", "..", "tests", "fixtures", "audit", "ghost")
 	cmd := &cobra.Command{}
 	cmd.SetOut(&bytes.Buffer{})
-	err := runAudit(cmd, dir, false, true)
+	err := runAudit(cmd, dir, false, true, resolved{})
 	var ee *exitError
 	if !errors.As(err, &ee) || ee.code != 1 {
 		t.Fatalf("expected *exitError{code:1}, got %v", err)
@@ -150,7 +150,7 @@ func TestAuditCLICheckPasses(t *testing.T) {
 	dir := filepath.Join("..", "..", "tests", "fixtures", "audit", "healthy")
 	cmd := &cobra.Command{}
 	cmd.SetOut(&bytes.Buffer{})
-	if err := runAudit(cmd, dir, false, true); err != nil {
+	if err := runAudit(cmd, dir, false, true, resolved{}); err != nil {
 		t.Fatalf("expected nil error on healthy fixture, got %v", err)
 	}
 }
@@ -160,7 +160,7 @@ func TestAuditCLICheckJSON(t *testing.T) {
 	cmd := &cobra.Command{}
 	var buf bytes.Buffer
 	cmd.SetOut(&buf)
-	err := runAudit(cmd, dir, true, true)
+	err := runAudit(cmd, dir, true, true, resolved{})
 	var ee *exitError
 	if !errors.As(err, &ee) || ee.code != 1 {
 		t.Fatalf("expected *exitError{code:1}, got %v", err)
