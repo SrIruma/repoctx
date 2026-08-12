@@ -59,6 +59,9 @@ go test ./...
   and tests in the same commit.
 - `audit` output is written through `cmd.OutOrStdout()` so CLI tests can
   capture it; `info --json` uses `os.Stdout`.
+- `repoctx audit . --check` is the CI-gating workflow: it exits non-zero when
+  a context file fails, so it can block merges when `AGENTS.md` / `CLAUDE.md`
+  drift from the code. This repository gates itself with it.
 
 ## Pull request checklist
 

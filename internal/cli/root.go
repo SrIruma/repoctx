@@ -1,11 +1,19 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/spf13/cobra"
 )
+
+// exitError signals a deliberate non-zero exit. The command has already
+// printed its output, so Execute returns the code without an error message.
+type exitError struct{ code int }
+
+func (e *exitError) Error() string { return fmt.Sprintf("exit code %d", e.code) }
 
 // version is overridden at build time via -ldflags
 // (-X github.com/SrIruma/repoctx/internal/cli.version=...).
@@ -25,12 +33,27 @@ func NewRootCmd() *cobra.Command {
 	root.AddCommand(newInfoCmd())
 	root.AddCommand(newGenerateCmd())
 	root.AddCommand(newAuditCmd())
+	root.AddCommand(newWorkflowCmd())
 	return root
 }
 
 func Execute() {
-	if err := NewRootCmd().Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, "error:", err)
-		os.Exit(1)
+	os.Exit(execute(NewRootCmd(), os.Stdout, os.Stderr))
+}
+
+// execute runs root and returns the process exit code. Errors wrapped in
+// *exitError map to their code silently; anything else is reported and
+// returns 1.
+func execute(root *cobra.Command, stdout, stderr io.Writer) int {
+	root.SetOut(stdout)
+	root.SetErr(stderr)
+	if err := root.Execute(); err != nil {
+		var ee *exitError
+		if errors.As(err, &ee) {
+			return ee.code
+		}
+		fmt.Fprintln(stderr, "error:", err)
+		return 1
 	}
+	return 0
 }
