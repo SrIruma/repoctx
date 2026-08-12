@@ -67,6 +67,47 @@ func TestCargoAdapter(t *testing.T) {
 	}
 }
 
+func TestCargoAdapterWorkspaceRoot(t *testing.T) {
+	ad := cargoAdapter{}
+	md, err := ad.Read(fixture(t, "scanner/workspace-cargo/Cargo.toml"))
+	if err != nil {
+		t.Fatalf("read: %v", err)
+	}
+	want := map[string]string{
+		"build":  "cargo build",
+		"test":   "cargo test",
+		"fmt":    "cargo fmt --check",
+		"clippy": "cargo clippy",
+	}
+	for name, cmd := range want {
+		if !hasCommand(md.Commands, name, cmd) {
+			t.Errorf("missing cargo %s (%q) in workspace root: %v", name, cmd, commandNames(md.Commands))
+		}
+	}
+	if hasCommand(md.Commands, "run", "cargo run") {
+		t.Errorf("virtual workspace root must not expose cargo run: %v", md.Commands)
+	}
+	for _, dep := range []string{"serde", "anyhow"} {
+		if !contains(md.Deps, dep) {
+			t.Errorf("missing workspace dependency %q in %v", dep, md.Deps)
+		}
+	}
+}
+
+func TestCargoAdapterWorkspaceMember(t *testing.T) {
+	ad := cargoAdapter{}
+	md, err := ad.Read(fixture(t, "scanner/workspace-cargo/crates/a/Cargo.toml"))
+	if err != nil {
+		t.Fatalf("read: %v", err)
+	}
+	if !hasCommand(md.Commands, "run", "cargo run") {
+		t.Errorf("workspace member crate should keep cargo run: %v", md.Commands)
+	}
+	if !contains(md.Deps, "serde") || !contains(md.Deps, "tokio") {
+		t.Errorf("expected deps [serde tokio], got %v", md.Deps)
+	}
+}
+
 func TestGoAdapter(t *testing.T) {
 	ad := goAdapter{}
 	md, err := ad.Read(fixture(t, "go/go.mod"))
