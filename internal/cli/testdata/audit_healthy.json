@@ -1,0 +1,19 @@
+[
+  {
+    "file": "<repo>/audit/healthy/AGENTS.md",
+    "checks": [
+      {
+        "name": "commands",
+        "passed": true,
+        "detail": "3 commands claimed"
+      },
+      {
+        "name": "paths",
+        "passed": true,
+        "detail": "all referenced paths exist"
+      }
+    ],
+    "score": 100,
+    "passed": true
+  }
+]

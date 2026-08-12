@@ -1,0 +1,25 @@
+[
+  {
+    "file": "<repo>/audit/ghost/AGENTS.md",
+    "checks": [
+      {
+        "name": "commands",
+        "passed": false,
+        "detail": "1 ghost command(s) out of 2 claimed",
+        "issues": [
+          {
+            "command": "npm run lint",
+            "detail": "ghost command: no longer present in the project"
+          }
+        ]
+      },
+      {
+        "name": "paths",
+        "passed": true,
+        "detail": "all referenced paths exist"
+      }
+    ],
+    "score": 50,
+    "passed": false
+  }
+]
