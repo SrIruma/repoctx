@@ -78,6 +78,7 @@ func loadProject(dir string, opts resolved) (*project.Project, error) {
 		}
 		md, err := ad.Read(filepath.Join(dir, m.Path))
 		if err != nil {
+			m.Errors = append(m.Errors, err.Error())
 			continue
 		}
 		m.Language = ad.Language()

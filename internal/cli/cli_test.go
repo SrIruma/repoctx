@@ -14,6 +14,7 @@ import (
 
 	"github.com/SrIruma/repoctx/internal/audit"
 	"github.com/SrIruma/repoctx/internal/markdown"
+	"github.com/SrIruma/repoctx/internal/project"
 )
 
 func writeTestProject(t *testing.T, agentsContent string) string {
@@ -206,6 +207,41 @@ func TestGenerateDryRunVersusRealRun(t *testing.T) {
 	}
 	if strings.Contains(string(data), "| stale |") {
 		t.Errorf("real run did not replace stale content:\n%s", data)
+	}
+}
+
+func TestLoadProjectKeepsManifestErrors(t *testing.T) {
+	dir := writeTestProject(t, "")
+	broken := filepath.Join(dir, "broken")
+	if err := os.MkdirAll(broken, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(broken, "package.json"), []byte("{not json"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	p, err := loadProject(dir, resolved{})
+	if err != nil {
+		t.Fatalf("loadProject: %v", err)
+	}
+	if len(p.Manifests) != 2 {
+		t.Fatalf("expected both manifests despite one being corrupt, got %+v", p.Manifests)
+	}
+	byPath := map[string]*project.Manifest{}
+	for _, m := range p.Manifests {
+		byPath[m.Path] = m
+	}
+	if len(byPath["package.json"].Errors) != 0 {
+		t.Errorf("healthy manifest should have no errors, got %v", byPath["package.json"].Errors)
+	}
+	if len(byPath["package.json"].Commands) == 0 {
+		t.Errorf("healthy manifest should keep its facts")
+	}
+	if len(byPath["broken/package.json"].Errors) == 0 {
+		t.Errorf("corrupt manifest should record an extraction error")
+	}
+	if len(byPath["broken/package.json"].Commands) != 0 {
+		t.Errorf("corrupt manifest should have no commands")
 	}
 }
 
