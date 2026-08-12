@@ -32,6 +32,9 @@ type Manifest struct {
 	Scope    string       `json:"scope"`
 	Commands []Command    `json:"commands"`
 	Deps     []string     `json:"deps,omitempty"`
+	// Errors are per-manifest extraction failures. Best-effort extraction
+	// keeps the manifest in the project with zero facts and records why.
+	Errors []string `json:"errors,omitempty"`
 }
 
 // Project is the result of scanning a repository tree.

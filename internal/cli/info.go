@@ -78,6 +78,7 @@ func loadProject(dir string, opts resolved) (*project.Project, error) {
 		}
 		md, err := ad.Read(filepath.Join(dir, m.Path))
 		if err != nil {
+			m.Errors = append(m.Errors, err.Error())
 			continue
 		}
 		m.Language = ad.Language()
@@ -106,6 +107,9 @@ func printHuman(w io.Writer, root string, p *project.Project) error {
 		}
 		fmt.Fprintf(w, "  %-28s %-10s %-22s commands: [%s]  (%d deps)\n",
 			m.Path, m.Kind, m.Language, strings.Join(names, ", "), len(m.Deps))
+		for _, err := range m.Errors {
+			fmt.Fprintf(w, "  ! %s: %s\n", m.Path, err)
+		}
 	}
 	for _, o := range p.DetectedOther {
 		fmt.Fprintf(w, "  ! %s\n", o)

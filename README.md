@@ -32,8 +32,8 @@ make install # -> $GOBIN/repoctx
 
 | Command | Description |
 |---|---|
-| `repoctx info [dir]` | Detect manifests and extract facts from a repository. |
-| `repoctx generate [dir]` | Regenerate the code-derived sections of `AGENTS.md` / `CLAUDE.md` between repoctx markers. |
+| `repoctx info [dir]` | Detect manifests and extract facts from a repository. Manifests that fail to parse are kept in the report with a `!` warning (and an `errors` field in `--json`). |
+| `repoctx generate [dir]` | Regenerate the code-derived sections of `AGENTS.md` / `CLAUDE.md` between repoctx markers. `--dry-run` previews what would change without writing. |
 | `repoctx audit [dir]` | Detect context rot: stale paths and ghost commands, with a health score. `--check` exits non-zero on failure for CI gating. |
 | `repoctx workflow [file ...]` | Print a paste-ready block telling agents how to keep the context file truthful. |
 

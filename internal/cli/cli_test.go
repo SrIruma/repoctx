@@ -8,11 +8,13 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/spf13/cobra"
 
 	"github.com/SrIruma/repoctx/internal/audit"
 	"github.com/SrIruma/repoctx/internal/markdown"
+	"github.com/SrIruma/repoctx/internal/project"
 )
 
 func writeTestProject(t *testing.T, agentsContent string) string {
@@ -35,7 +37,7 @@ func TestGenerateRoundTrip(t *testing.T) {
 		markdown.StartMarker+"\n| stale |\n"+markdown.EndMarker+"\n")
 	cmd := &cobra.Command{}
 	cmd.SetOut(&bytes.Buffer{})
-	if err := runGenerate(cmd, dir, []string{"AGENTS.md"}, resolved{}); err != nil {
+	if err := runGenerate(cmd, dir, []string{"AGENTS.md"}, resolved{}, false); err != nil {
 		t.Fatalf("runGenerate: %v", err)
 	}
 	data, err := os.ReadFile(filepath.Join(dir, "AGENTS.md"))
@@ -64,7 +66,7 @@ func TestGenerateModulesRoundTripKeepsCommandsOnly(t *testing.T) {
 		markdown.StartMarker+"\n| stale |\n"+markdown.EndMarker+"\n")
 	cmd := &cobra.Command{}
 	cmd.SetOut(&bytes.Buffer{})
-	if err := runGenerate(cmd, dir, []string{"AGENTS.md"}, resolved{}); err != nil {
+	if err := runGenerate(cmd, dir, []string{"AGENTS.md"}, resolved{}, false); err != nil {
 		t.Fatalf("runGenerate: %v", err)
 	}
 	data, err := os.ReadFile(filepath.Join(dir, "AGENTS.md"))
@@ -84,7 +86,7 @@ func TestGenerateCreatesMissingFile(t *testing.T) {
 	dir := writeTestProject(t, "")
 	cmd := &cobra.Command{}
 	cmd.SetOut(&bytes.Buffer{})
-	if err := runGenerate(cmd, dir, []string{"CLAUDE.md"}, resolved{}); err != nil {
+	if err := runGenerate(cmd, dir, []string{"CLAUDE.md"}, resolved{}, false); err != nil {
 		t.Fatalf("runGenerate: %v", err)
 	}
 	data, err := os.ReadFile(filepath.Join(dir, "CLAUDE.md"))
@@ -99,8 +101,200 @@ func TestGenerateCreatesMissingFile(t *testing.T) {
 func TestGenerateFailsWithoutMarkers(t *testing.T) {
 	dir := writeTestProject(t, "# no markers here")
 	cmd := &cobra.Command{}
-	if err := runGenerate(cmd, dir, []string{"AGENTS.md"}, resolved{}); err == nil {
+	if err := runGenerate(cmd, dir, []string{"AGENTS.md"}, resolved{}, false); err == nil {
 		t.Fatal("expected error for a file without markers")
+	}
+}
+
+func TestGenerateDryRunReportsUpdateWithoutWriting(t *testing.T) {
+	dir := writeTestProject(t, "# My Project\n\nHuman notes.\n\n## Commands\n\n"+
+		markdown.StartMarker+"\n| stale |\n"+markdown.EndMarker+"\n")
+	path := filepath.Join(dir, "AGENTS.md")
+	old := time.Now().Add(-time.Hour)
+	if err := os.Chtimes(path, old, old); err != nil {
+		t.Fatalf("set mtime: %v", err)
+	}
+	before, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cmd := &cobra.Command{}
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	if err := runGenerate(cmd, dir, []string{"AGENTS.md"}, resolved{}, true); err != nil {
+		t.Fatalf("runGenerate dry-run: %v", err)
+	}
+	out := buf.String()
+	if !strings.Contains(out, "would update AGENTS.md") {
+		t.Errorf("dry-run should report what would change, got:\n%s", out)
+	}
+
+	after, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(before, after) {
+		t.Errorf("dry-run wrote the file:\n%s", after)
+	}
+	fi, err := os.Stat(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !fi.ModTime().Equal(old) {
+		t.Errorf("mtime changed: got %v, want %v", fi.ModTime(), old)
+	}
+}
+
+func TestGenerateDryRunUpToDate(t *testing.T) {
+	dir := writeTestProject(t, "# P\n\n## Commands\n\n"+
+		markdown.StartMarker+"\n| stale |\n"+markdown.EndMarker+"\n")
+	cmd := &cobra.Command{}
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	if err := runGenerate(cmd, dir, []string{"AGENTS.md"}, resolved{}, false); err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	data, err := os.ReadFile(filepath.Join(dir, "AGENTS.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cmd = &cobra.Command{}
+	buf.Reset()
+	cmd.SetOut(&buf)
+	if err := runGenerate(cmd, dir, []string{"AGENTS.md"}, resolved{}, true); err != nil {
+		t.Fatalf("runGenerate dry-run: %v", err)
+	}
+	if !strings.Contains(buf.String(), "is up to date") {
+		t.Errorf("dry-run should report up-to-date file, got:\n%s", buf.String())
+	}
+	after, err := os.ReadFile(filepath.Join(dir, "AGENTS.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(data, after) {
+		t.Errorf("dry-run modified an up-to-date file")
+	}
+}
+
+func TestGenerateDryRunVersusRealRun(t *testing.T) {
+	dir := writeTestProject(t, "# P\n\n## Commands\n\n"+
+		markdown.StartMarker+"\n| stale |\n"+markdown.EndMarker+"\n")
+	path := filepath.Join(dir, "AGENTS.md")
+
+	cmd := &cobra.Command{}
+	cmd.SetOut(&bytes.Buffer{})
+	if err := runGenerate(cmd, dir, []string{"AGENTS.md"}, resolved{}, true); err != nil {
+		t.Fatalf("dry-run: %v", err)
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(data), "| stale |") {
+		t.Errorf("dry-run wrote content; file changed:\n%s", data)
+	}
+
+	cmd = &cobra.Command{}
+	cmd.SetOut(&bytes.Buffer{})
+	if err := runGenerate(cmd, dir, []string{"AGENTS.md"}, resolved{}, false); err != nil {
+		t.Fatalf("real run: %v", err)
+	}
+	data, err = os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(data), "| stale |") {
+		t.Errorf("real run did not replace stale content:\n%s", data)
+	}
+}
+
+func TestLoadProjectKeepsManifestErrors(t *testing.T) {
+	dir := writeTestProject(t, "")
+	broken := filepath.Join(dir, "broken")
+	if err := os.MkdirAll(broken, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(broken, "package.json"), []byte("{not json"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	p, err := loadProject(dir, resolved{})
+	if err != nil {
+		t.Fatalf("loadProject: %v", err)
+	}
+	if len(p.Manifests) != 2 {
+		t.Fatalf("expected both manifests despite one being corrupt, got %+v", p.Manifests)
+	}
+	byPath := map[string]*project.Manifest{}
+	for _, m := range p.Manifests {
+		byPath[m.Path] = m
+	}
+	if len(byPath["package.json"].Errors) != 0 {
+		t.Errorf("healthy manifest should have no errors, got %v", byPath["package.json"].Errors)
+	}
+	if len(byPath["package.json"].Commands) == 0 {
+		t.Errorf("healthy manifest should keep its facts")
+	}
+	if len(byPath["broken/package.json"].Errors) == 0 {
+		t.Errorf("corrupt manifest should record an extraction error")
+	}
+	if len(byPath["broken/package.json"].Commands) != 0 {
+		t.Errorf("corrupt manifest should have no commands")
+	}
+}
+
+func TestInfoJSONSurfacesManifestErrors(t *testing.T) {
+	dir := writeTestProject(t, "")
+	broken := filepath.Join(dir, "broken")
+	if err := os.MkdirAll(broken, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(broken, "package.json"), []byte("{not json"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	out, errOut, code := execCLI(t, "info", dir, "--json")
+	if code != 0 {
+		t.Fatalf("info exit code = %d, stderr:\n%s", code, errOut)
+	}
+	var p struct {
+		Manifests []struct {
+			Path   string   `json:"path"`
+			Errors []string `json:"errors"`
+		} `json:"manifests"`
+	}
+	if err := json.Unmarshal([]byte(out), &p); err != nil {
+		t.Fatalf("invalid info JSON: %v\n%s", err, out)
+	}
+	var got []string
+	for _, m := range p.Manifests {
+		if m.Path == "broken/package.json" {
+			got = m.Errors
+		}
+	}
+	if len(got) == 0 {
+		t.Errorf("info --json should list the extraction error for broken/package.json, got manifests %+v", p.Manifests)
+	}
+}
+
+func TestInfoHumanWarnsOnManifestErrors(t *testing.T) {
+	dir := writeTestProject(t, "")
+	broken := filepath.Join(dir, "broken")
+	if err := os.MkdirAll(broken, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(broken, "package.json"), []byte("{not json"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	out, errOut, code := execCLI(t, "info", dir)
+	if code != 0 {
+		t.Fatalf("info exit code = %d, stderr:\n%s", code, errOut)
+	}
+	if !strings.Contains(out, "! broken/package.json") {
+		t.Errorf("human output should warn about the failed manifest, got:\n%s", out)
 	}
 }
 
