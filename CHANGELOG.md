@@ -20,6 +20,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Golden tests in `internal/cli/testdata` pin the exact `info --json` and
   `audit --json` output (`go test ./internal/cli -run TestGoldenJSON
   -update` to regenerate snapshots).
+- `docs/migration.md` is a 0.x → 1.0.0 migration guide covering the config
+  file, new flags, JSON schema changes and the exit-code contract.
+- CONTRIBUTING.md defines the post-1.0 semver policy: breaking changes
+  (including contract changes) → major, features → minor, fixes → patch.
 
 ## [v0.4.0] - 2026-08-12
 
