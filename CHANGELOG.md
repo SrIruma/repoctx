@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.2.0] - 2026-08-12
+
 ### Added
 
 - `repoctx audit --check` exits non-zero when any audited file fails, turning
@@ -23,6 +25,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `audit` no longer flags `AGENTS.md` / `CLAUDE.md` or Go symbols such as
   `internal/cli.version` as stale paths. Path detection now uses a known set of
   file extensions while keeping directory detection.
+
+### Changed
+
+- The repo's own CI now runs `repoctx audit . --check`, so `AGENTS.md` cannot
+  rot on `main` (dogfooding the CI gate).
 
 ## [v0.1.0] - 2026-08-11
 
@@ -59,6 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   meson) are detected and reported.
 - CI workflow (`go vet`, `go build`, `go test`) on push to `main` and PRs.
 
-[Unreleased]: https://github.com/SrIruma/repoctx/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/SrIruma/repoctx/compare/v0.2.0...HEAD
+[v0.2.0]: https://github.com/SrIruma/repoctx/compare/v0.1.0...v0.2.0
 [v0.1.0]: https://github.com/SrIruma/repoctx/compare/v0.0.1...v0.1.0
 [v0.0.1]: https://github.com/SrIruma/repoctx/releases/tag/v0.0.1
