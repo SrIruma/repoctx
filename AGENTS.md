@@ -95,6 +95,10 @@ The code is split into small, single-purpose packages:
 | `meson setup build` | `tests/fixtures/scanner/poly5/meson.build` |
 | `meson compile -C build` | `tests/fixtures/scanner/poly5/meson.build` |
 | `meson test -C build` | `tests/fixtures/scanner/poly5/meson.build` |
+| `cargo build` | `tests/fixtures/scanner/workspace-cargo/Cargo.toml` |
+| `cargo test` | `tests/fixtures/scanner/workspace-cargo/Cargo.toml` |
+| `cargo fmt --check` | `tests/fixtures/scanner/workspace-cargo/Cargo.toml` |
+| `cargo clippy` | `tests/fixtures/scanner/workspace-cargo/Cargo.toml` |
 | `npm run build` | `tests/fixtures/scanner/workspace-npm/package.json` |
 | `npm run test` | `tests/fixtures/scanner/workspace-npm/package.json` |
 
@@ -126,5 +130,6 @@ The code is split into small, single-purpose packages:
 | `tests/fixtures/scanner/poly5/composer.json` | PHP |  |
 | `tests/fixtures/scanner/poly5/meson.build` | C/C++ | benchmark, gtest |
 | `tests/fixtures/scanner/poly5/pom.xml` | Java |  |
+| `tests/fixtures/scanner/workspace-cargo/Cargo.toml` | Rust | anyhow, serde |
 | `tests/fixtures/scanner/workspace-npm/package.json` | JavaScript/TypeScript |  |
 <!-- repoctx:end -->

@@ -38,6 +38,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   command from different packages is disambiguated by the Source column, and
   no `(command, source)` row is ever duplicated. See the "Workspaces"
   section of the README.
+- Cargo workspaces are covered by a fixture and tests that pin the
+  Commands-table policy (see the "Workspaces" section of the README): a
+  virtual workspace root (a `Cargo.toml` with `[workspace]` and no
+  `[package]`) no longer reports `cargo run`, and dependencies declared in
+  `[workspace.dependencies]` are now extracted instead of being invisible.
 
 ## [v0.3.0] - 2026-08-12
 

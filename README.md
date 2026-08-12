@@ -76,6 +76,12 @@ workspace root and each member package. Commands are attributed per manifest:
   Source column of the Commands table;
 - a given `(command, source)` row is never emitted twice.
 
+Cargo has one nuance: a virtual workspace root (a `Cargo.toml` with
+`[workspace]` and no `[package]`) exposes the commands that operate on the
+whole workspace — `cargo build`, `cargo test`, `cargo fmt --check`,
+`cargo clippy` — but not `cargo run`, which has no default binary to run.
+Member crates keep the full command set.
+
 ## Demo
 
 Inspect what a monorepo looks like to repoctx:

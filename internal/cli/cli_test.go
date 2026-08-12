@@ -425,7 +425,7 @@ func TestWorkflowTemplateMultipleFiles(t *testing.T) {
 	}
 }
 
-// Workspace policy: commands are attributed per manifest. The same command
+// Workspace policy (npm): commands are attributed per manifest. The same command
 // string from different manifests (e.g. `npm run test` at the workspace root
 // and in each package) is intentional and disambiguated by the Source column.
 // The rendered Commands table never contains the same (command, source) row
@@ -444,6 +444,50 @@ func TestWorkspaceNPMCommandsPolicy(t *testing.T) {
 		{Command: "npm run test", Source: "package.json"},
 		{Command: "npm run test", Source: "packages/app/package.json"},
 		{Command: "npm run test", Source: "packages/lib/package.json"},
+	}
+	if len(rows) != len(want) {
+		t.Fatalf("expected %d command rows, got %d: %+v", len(want), len(rows), rows)
+	}
+	for _, w := range want {
+		if !containsRow(rows, w) {
+			t.Errorf("missing command row %+v in %+v", w, rows)
+		}
+	}
+	if dup := duplicateRows(rows); len(dup) > 0 {
+		t.Errorf("duplicate command rows: %+v", dup)
+	}
+}
+
+// Workspace policy (cargo): commands are attributed per manifest. A virtual
+// workspace root (a Cargo.toml with [workspace] but no [package]) exposes the
+// commands that operate on the whole workspace (build, test, fmt, clippy) but
+// not `cargo run`, which has no default binary to run. Member crates keep the
+// full set. The same command from different manifests is intentional and is
+// disambiguated by the Source column; a (command, source) row is never
+// duplicated.
+func TestWorkspaceCargoCommandsPolicy(t *testing.T) {
+	dir := filepath.Join("..", "..", "tests", "fixtures", "scanner", "workspace-cargo")
+	p, err := loadProject(dir, resolved{})
+	if err != nil {
+		t.Fatalf("loadProject: %v", err)
+	}
+	rows := tableRows(p)
+
+	want := []markdown.Row{
+		{Command: "cargo build", Source: "Cargo.toml"},
+		{Command: "cargo test", Source: "Cargo.toml"},
+		{Command: "cargo fmt --check", Source: "Cargo.toml"},
+		{Command: "cargo clippy", Source: "Cargo.toml"},
+		{Command: "cargo build", Source: "crates/a/Cargo.toml"},
+		{Command: "cargo test", Source: "crates/a/Cargo.toml"},
+		{Command: "cargo run", Source: "crates/a/Cargo.toml"},
+		{Command: "cargo fmt --check", Source: "crates/a/Cargo.toml"},
+		{Command: "cargo clippy", Source: "crates/a/Cargo.toml"},
+		{Command: "cargo build", Source: "crates/b/Cargo.toml"},
+		{Command: "cargo test", Source: "crates/b/Cargo.toml"},
+		{Command: "cargo run", Source: "crates/b/Cargo.toml"},
+		{Command: "cargo fmt --check", Source: "crates/b/Cargo.toml"},
+		{Command: "cargo clippy", Source: "crates/b/Cargo.toml"},
 	}
 	if len(rows) != len(want) {
 		t.Fatalf("expected %d command rows, got %d: %+v", len(want), len(rows), rows)

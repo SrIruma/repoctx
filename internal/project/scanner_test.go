@@ -165,3 +165,30 @@ func TestScannerWorkspaceNPM(t *testing.T) {
 		}
 	}
 }
+
+func TestScannerWorkspaceCargo(t *testing.T) {
+	root := filepath.Join("..", "..", "tests", "fixtures", "scanner", "workspace-cargo")
+	p, err := NewScanner(root).Scan()
+	if err != nil {
+		t.Fatalf("scan: %v", err)
+	}
+	want := []struct {
+		path  string
+		scope string
+	}{
+		{"Cargo.toml", "."},
+		{"crates/a/Cargo.toml", "crates/a"},
+		{"crates/b/Cargo.toml", "crates/b"},
+	}
+	if len(p.Manifests) != len(want) {
+		t.Fatalf("expected %d manifests, got %d: %+v", len(want), len(p.Manifests), p.Manifests)
+	}
+	for i, w := range want {
+		if p.Manifests[i].Path != w.path {
+			t.Errorf("manifests[%d].Path = %q, want %q", i, p.Manifests[i].Path, w.path)
+		}
+		if p.Manifests[i].Scope != w.scope {
+			t.Errorf("manifests[%d].Scope = %q, want %q", i, p.Manifests[i].Scope, w.scope)
+		}
+	}
+}
