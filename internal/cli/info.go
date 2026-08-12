@@ -107,6 +107,9 @@ func printHuman(w io.Writer, root string, p *project.Project) error {
 		}
 		fmt.Fprintf(w, "  %-28s %-10s %-22s commands: [%s]  (%d deps)\n",
 			m.Path, m.Kind, m.Language, strings.Join(names, ", "), len(m.Deps))
+		for _, err := range m.Errors {
+			fmt.Fprintf(w, "  ! %s: %s\n", m.Path, err)
+		}
 	}
 	for _, o := range p.DetectedOther {
 		fmt.Fprintf(w, "  ! %s\n", o)

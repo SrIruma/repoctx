@@ -245,6 +245,59 @@ func TestLoadProjectKeepsManifestErrors(t *testing.T) {
 	}
 }
 
+func TestInfoJSONSurfacesManifestErrors(t *testing.T) {
+	dir := writeTestProject(t, "")
+	broken := filepath.Join(dir, "broken")
+	if err := os.MkdirAll(broken, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(broken, "package.json"), []byte("{not json"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	out, errOut, code := execCLI(t, "info", dir, "--json")
+	if code != 0 {
+		t.Fatalf("info exit code = %d, stderr:\n%s", code, errOut)
+	}
+	var p struct {
+		Manifests []struct {
+			Path   string   `json:"path"`
+			Errors []string `json:"errors"`
+		} `json:"manifests"`
+	}
+	if err := json.Unmarshal([]byte(out), &p); err != nil {
+		t.Fatalf("invalid info JSON: %v\n%s", err, out)
+	}
+	var got []string
+	for _, m := range p.Manifests {
+		if m.Path == "broken/package.json" {
+			got = m.Errors
+		}
+	}
+	if len(got) == 0 {
+		t.Errorf("info --json should list the extraction error for broken/package.json, got manifests %+v", p.Manifests)
+	}
+}
+
+func TestInfoHumanWarnsOnManifestErrors(t *testing.T) {
+	dir := writeTestProject(t, "")
+	broken := filepath.Join(dir, "broken")
+	if err := os.MkdirAll(broken, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(broken, "package.json"), []byte("{not json"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	out, errOut, code := execCLI(t, "info", dir)
+	if code != 0 {
+		t.Fatalf("info exit code = %d, stderr:\n%s", code, errOut)
+	}
+	if !strings.Contains(out, "! broken/package.json") {
+		t.Errorf("human output should warn about the failed manifest, got:\n%s", out)
+	}
+}
+
 func TestAuditCLIHuman(t *testing.T) {
 	dir := filepath.Join("..", "..", "tests", "fixtures", "audit", "ghost")
 	cmd := &cobra.Command{}
