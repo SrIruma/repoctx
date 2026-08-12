@@ -5,6 +5,7 @@
 #   make test                  # go test ./...
 #   make install               # go install -> $GOBIN/repoctx
 #   make release VERSION=v0.1.0  # dist/ binaries + SHA256SUMS.txt
+#   make docs-examples          # regenerate docs/examples.md from real CLI output
 #   make clean
 
 GO      ?= go
@@ -16,7 +17,7 @@ LD_FLAGS = -X github.com/SrIruma/repoctx/internal/cli.version=$(VERSION)
 # Release targets. Override with PLATFORMS="linux/amd64" to narrow a build.
 PLATFORMS ?= linux/amd64 linux/arm64 windows/amd64
 
-.PHONY: all build test install release clean
+.PHONY: all build test install release docs-examples clean
 
 all: build
 
@@ -52,3 +53,6 @@ release: ## Cross-compile a versioned release into dist/.
 
 clean: ## Remove local build artifacts.
 	rm -rf bin dist
+
+docs-examples: build ## Regenerate docs/examples.md from the real CLI output.
+	scripts/gen-examples.sh

@@ -1,0 +1,76 @@
+{
+  "root": "<repo>/scanner/mono",
+  "manifests": [
+    {
+      "path": "backend/go.mod",
+      "kind": "go",
+      "language": "Go",
+      "scope": "backend",
+      "commands": [
+        {
+          "name": "build",
+          "cmd": "go build ./..."
+        },
+        {
+          "name": "test",
+          "cmd": "go test ./..."
+        },
+        {
+          "name": "vet",
+          "cmd": "go vet ./..."
+        },
+        {
+          "name": "fmt",
+          "cmd": "gofmt -l ."
+        }
+      ],
+      "deps": [
+        "github.com/spf13/cobra"
+      ]
+    },
+    {
+      "path": "package.json",
+      "kind": "npm",
+      "language": "JavaScript/TypeScript",
+      "scope": ".",
+      "commands": [
+        {
+          "name": "build",
+          "cmd": "npm run build"
+        },
+        {
+          "name": "test",
+          "cmd": "npm run test"
+        }
+      ]
+    },
+    {
+      "path": "tools/rust/Cargo.toml",
+      "kind": "cargo",
+      "language": "Rust",
+      "scope": "tools/rust",
+      "commands": [
+        {
+          "name": "build",
+          "cmd": "cargo build"
+        },
+        {
+          "name": "test",
+          "cmd": "cargo test"
+        },
+        {
+          "name": "run",
+          "cmd": "cargo run"
+        },
+        {
+          "name": "fmt",
+          "cmd": "cargo fmt --check"
+        },
+        {
+          "name": "clippy",
+          "cmd": "cargo clippy"
+        }
+      ]
+    }
+  ]
+}

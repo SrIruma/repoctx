@@ -1,0 +1,25 @@
+[
+  {
+    "file": "<repo>/audit/stale/AGENTS.md",
+    "checks": [
+      {
+        "name": "commands",
+        "passed": true,
+        "detail": "1 commands claimed"
+      },
+      {
+        "name": "paths",
+        "passed": false,
+        "detail": "1 stale path(s)",
+        "issues": [
+          {
+            "path": "legacy/schema.md",
+            "detail": "stale path: not found in repository"
+          }
+        ]
+      }
+    ],
+    "score": 50,
+    "passed": false
+  }
+]

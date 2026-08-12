@@ -1,0 +1,30 @@
+{
+  "root": "<repo>/scanner/corrupt",
+  "manifests": [
+    {
+      "path": "broken/package.json",
+      "kind": "npm",
+      "language": "",
+      "scope": "broken",
+      "commands": null,
+      "errors": [
+        "invalid character 'n' looking for beginning of object key string"
+      ]
+    },
+    {
+      "path": "package.json",
+      "kind": "npm",
+      "language": "JavaScript/TypeScript",
+      "scope": ".",
+      "commands": [
+        {
+          "name": "test",
+          "cmd": "npm run test"
+        }
+      ],
+      "deps": [
+        "typescript"
+      ]
+    }
+  ]
+}
