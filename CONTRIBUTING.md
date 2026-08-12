@@ -9,7 +9,7 @@ welcome: bug reports, feature requests, documentation, and code.
 - `internal/cli/` — cobra commands (`info`, `generate`, `audit`).
 - `internal/project/` — repository scanning and the manifest model.
 - `internal/adapters/` — one adapter per manifest format (npm, cargo, go,
-  pyproject, make).
+  pyproject, make, cmake, ruby, composer, maven, gradle).
 - `internal/markdown/` — marker-aware parsing and rendering of context files.
 - `internal/audit/` — rot checks and report scoring.
 - `tests/fixtures/` — fixture projects used by the test suite.

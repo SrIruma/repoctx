@@ -32,22 +32,23 @@ var defaultSkipDirs = map[string]bool{
 // implemented yet. Detection degrades gracefully: they are reported, generic
 // checks still apply, extraction simply has no adapter.
 var knownOtherManifests = map[string]string{
-	"CMakeLists.txt": "c++ (adapter pending)",
-	"meson.build":    "meson (adapter pending)",
-	"Gemfile":        "ruby (adapter pending)",
-	"composer.json":  "php (adapter pending)",
-	"pom.xml":        "java (adapter pending)",
-	"build.gradle":   "gradle (adapter pending)",
+	"meson.build": "meson (adapter pending)",
 }
 
 var manifestKinds = map[string]ManifestKind{
-	"package.json":   KindNPM,
-	"Cargo.toml":     KindCargo,
-	"go.mod":         KindGo,
-	"pyproject.toml": KindPyProject,
-	"Makefile":       KindMake,
-	"makefile":       KindMake,
-	"GNUmakefile":    KindMake,
+	"package.json":     KindNPM,
+	"Cargo.toml":       KindCargo,
+	"go.mod":           KindGo,
+	"pyproject.toml":   KindPyProject,
+	"Makefile":         KindMake,
+	"makefile":         KindMake,
+	"GNUmakefile":      KindMake,
+	"CMakeLists.txt":   KindCMake,
+	"Gemfile":          KindGemfile,
+	"composer.json":    KindComposer,
+	"pom.xml":          KindMaven,
+	"build.gradle":     KindGradle,
+	"build.gradle.kts": KindGradle,
 }
 
 // Scanner walks a repository tree looking for project manifests.

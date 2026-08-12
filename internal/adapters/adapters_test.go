@@ -131,3 +131,96 @@ func contains(list []string, want string) bool {
 	}
 	return false
 }
+
+func TestCMakeAdapter(t *testing.T) {
+	ad := cmakeAdapter{}
+	md, err := ad.Read(fixture(t, "cmake/CMakeLists.txt"))
+	if err != nil {
+		t.Fatalf("read: %v", err)
+	}
+	for _, name := range []string{"build", "test"} {
+		if !hasCommand(md.Commands, name, "cmake --build build --target "+name) {
+			t.Errorf("missing cmake target %q: %v", name, commandNames(md.Commands))
+		}
+	}
+	for _, dep := range []string{"Boost", "OpenSSL"} {
+		if !contains(md.Deps, dep) {
+			t.Errorf("missing find_package dep %q in %v", dep, md.Deps)
+		}
+	}
+}
+
+func TestGemfileAdapter(t *testing.T) {
+	ad := gemfileAdapter{}
+	md, err := ad.Read(fixture(t, "ruby/Gemfile"))
+	if err != nil {
+		t.Fatalf("read: %v", err)
+	}
+	for _, name := range []string{"rails", "puma", "rspec"} {
+		if !hasCommand(md.Commands, name, "bundle exec "+name) {
+			t.Errorf("missing bundle exec %q command: %v", name, commandNames(md.Commands))
+		}
+		if !contains(md.Deps, name) {
+			t.Errorf("missing gem %q in %v", name, md.Deps)
+		}
+	}
+}
+
+func TestComposerAdapter(t *testing.T) {
+	ad := composerAdapter{}
+	md, err := ad.Read(fixture(t, "composer/composer.json"))
+	if err != nil {
+		t.Fatalf("read: %v", err)
+	}
+	if !hasCommand(md.Commands, "test", "composer run test") {
+		t.Errorf("missing composer run test: %v", md.Commands)
+	}
+	if !hasCommand(md.Commands, "lint", "composer run lint") {
+		t.Errorf("missing composer run lint: %v", md.Commands)
+	}
+	for _, dep := range []string{"monolog/monolog", "phpunit/phpunit"} {
+		if !contains(md.Deps, dep) {
+			t.Errorf("missing dependency %q in %v", dep, md.Deps)
+		}
+	}
+}
+
+func TestMavenAdapter(t *testing.T) {
+	ad := mavenAdapter{}
+	md, err := ad.Read(fixture(t, "maven/pom.xml"))
+	if err != nil {
+		t.Fatalf("read: %v", err)
+	}
+	for _, dep := range []string{
+		"org.springframework.boot:spring-boot-starter-web:3.2.0",
+		"junit:junit",
+	} {
+		if !contains(md.Deps, dep) {
+			t.Errorf("missing dependency %q in %v", dep, md.Deps)
+		}
+	}
+	if len(md.Commands) != 0 {
+		t.Errorf("pom.xml should expose no commands, got %v", commandNames(md.Commands))
+	}
+}
+
+func TestGradleAdapter(t *testing.T) {
+	ad := gradleAdapter{}
+	md, err := ad.Read(fixture(t, "gradle/build.gradle"))
+	if err != nil {
+		t.Fatalf("read: %v", err)
+	}
+	for _, dep := range []string{
+		"com.google.guava:guava:33.2.0-jre",
+		"com.fasterxml.jackson.core:jackson-databind:2.17.0",
+		"org.projectlombok:lombok:1.18.32",
+		"org.junit.jupiter:junit-jupiter:5.10.2",
+	} {
+		if !contains(md.Deps, dep) {
+			t.Errorf("missing dependency %q in %v", dep, md.Deps)
+		}
+	}
+	if contains(md.Deps, "project(':lib')") || contains(md.Deps, ":lib") {
+		t.Errorf("project references should be ignored: %v", md.Deps)
+	}
+}

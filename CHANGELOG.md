@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- New adapters for five more ecosystems: CMake (`CMakeLists.txt`, custom
+  targets as `cmake --build build --target <name>` commands, `find_package`
+  dependencies), Ruby (`Gemfile` gems as `bundle exec <gem>` commands and
+  dependencies), PHP (`composer.json` scripts as `composer run <script>`
+  commands plus `require`/`require-dev` dependencies), Java (`pom.xml`
+  `groupId:artifactId[:version]` dependencies) and Gradle (`build.gradle` /
+  `build.gradle.kts` dependencies from `implementation`, `api`, `compileOnly`,
+  `runtimeOnly`, `testImplementation`, `annotationProcessor`, `kapt` and
+  `classpath` configurations). The scanner now reports only `meson.build` as
+  detected-but-unsupported.
+
 ## [v0.2.0] - 2026-08-12
 
 ### Added
