@@ -1,6 +1,7 @@
 package audit
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -122,7 +123,8 @@ func TestAuditNoMarkersSkipsCommandsCheck(t *testing.T) {
 
 func TestCandidatePaths(t *testing.T) {
 	content := "See `backend/schema.md` and `docs/README.md#install`. URL `https://example.com/x`.\n" +
-		"Command `npm run test` and version `v0.0.1` should be ignored."
+		"Command `npm run test` and version `v0.0.1` should be ignored.\n" +
+		"`CLAUDE.md` and `internal/cli.version` are conceptual, not paths."
 	got := candidatePaths(content)
 	want := []string{"backend/schema.md", "docs/README.md"}
 	if len(got) != len(want) {
@@ -137,18 +139,53 @@ func TestCandidatePaths(t *testing.T) {
 
 func TestIsPathLike(t *testing.T) {
 	cases := map[string]bool{
-		"backend/schema.md": true,
-		"package.json":      true,
-		"Makefile":          true,
-		"v0.0.1":            false,
-		"go1.22":            false,
-		"npm run test":      false,
-		"https://x.io/a":    false,
-		"#section":          false,
+		"backend/schema.md":    true,
+		"package.json":         true,
+		"Makefile":             true,
+		"cmd/repoctx/":         true,
+		"tests/fixtures/":      true,
+		".gitignore":           true,
+		"v0.0.1":               false,
+		"go1.22":               false,
+		"internal/cli.version": false,
+		"docs/file.unknown":    false,
+		"npm run test":         false,
+		"https://x.io/a":       false,
+		"#section":             false,
 	}
 	for in, want := range cases {
 		if got := isPathLike(in); got != want {
 			t.Errorf("isPathLike(%q) = %v, want %v", in, got, want)
 		}
+	}
+}
+
+func TestAuditIgnoresConceptualReferences(t *testing.T) {
+	dir := t.TempDir()
+	pkg := `{"name":"t","scripts":{"test":"jest"}}`
+	if err := os.WriteFile(filepath.Join(dir, "package.json"), []byte(pkg), 0o644); err != nil {
+		t.Fatalf("write package.json: %v", err)
+	}
+	agents := "# Notes\n\n" +
+		"Supported files are `AGENTS.md` and `CLAUDE.md`.\n" +
+		"The version lives in `internal/cli.version`.\n\n" +
+		"## Commands\n\n" +
+		"<!-- repoctx:start -->\n" +
+		"| Command | Source |\n|---|---|\n" +
+		"| `npm run test` | `package.json` |\n" +
+		"<!-- repoctx:end -->\n"
+	if err := os.WriteFile(filepath.Join(dir, "AGENTS.md"), []byte(agents), 0o644); err != nil {
+		t.Fatalf("write AGENTS.md: %v", err)
+	}
+	r, err := Run(Options{
+		Root:   dir,
+		File:   filepath.Join(dir, "AGENTS.md"),
+		Actual: extractActual(t, dir),
+	})
+	if err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+	if !r.Passed || r.Score != 100 {
+		t.Errorf("expected pass with score 100, got score=%d passed=%v\n%+v", r.Score, r.Passed, r.Checks)
 	}
 }
