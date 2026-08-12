@@ -424,3 +424,57 @@ func TestWorkflowTemplateMultipleFiles(t *testing.T) {
 		}
 	}
 }
+
+// Workspace policy: commands are attributed per manifest. The same command
+// string from different manifests (e.g. `npm run test` at the workspace root
+// and in each package) is intentional and disambiguated by the Source column.
+// The rendered Commands table never contains the same (command, source) row
+// twice. Scopes are asserted at the scanner level; this test pins the
+// rendered output of a typical npm/pnpm monorepo.
+func TestWorkspaceNPMCommandsPolicy(t *testing.T) {
+	dir := filepath.Join("..", "..", "tests", "fixtures", "scanner", "workspace-npm")
+	p, err := loadProject(dir, resolved{})
+	if err != nil {
+		t.Fatalf("loadProject: %v", err)
+	}
+	rows := tableRows(p)
+
+	want := []markdown.Row{
+		{Command: "npm run build", Source: "package.json"},
+		{Command: "npm run test", Source: "package.json"},
+		{Command: "npm run test", Source: "packages/app/package.json"},
+		{Command: "npm run test", Source: "packages/lib/package.json"},
+	}
+	if len(rows) != len(want) {
+		t.Fatalf("expected %d command rows, got %d: %+v", len(want), len(rows), rows)
+	}
+	for _, w := range want {
+		if !containsRow(rows, w) {
+			t.Errorf("missing command row %+v in %+v", w, rows)
+		}
+	}
+	if dup := duplicateRows(rows); len(dup) > 0 {
+		t.Errorf("duplicate command rows: %+v", dup)
+	}
+}
+
+func containsRow(rows []markdown.Row, want markdown.Row) bool {
+	for _, r := range rows {
+		if r == want {
+			return true
+		}
+	}
+	return false
+}
+
+func duplicateRows(rows []markdown.Row) []markdown.Row {
+	seen := map[markdown.Row]int{}
+	var dup []markdown.Row
+	for _, r := range rows {
+		if seen[r] == 1 {
+			dup = append(dup, r)
+		}
+		seen[r]++
+	}
+	return dup
+}

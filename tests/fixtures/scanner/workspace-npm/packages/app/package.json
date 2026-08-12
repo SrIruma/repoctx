@@ -1,0 +1,10 @@
+{
+  "name": "@workspace-npm/app",
+  "version": "0.1.0",
+  "scripts": {
+    "test": "vitest run packages/app"
+  },
+  "dependencies": {
+    "react": "^18.0.0"
+  }
+}
