@@ -15,7 +15,7 @@ VERSION ?= dev
 LD_FLAGS = -X github.com/SrIruma/repoctx/internal/cli.version=$(VERSION)
 
 # Release targets. Override with PLATFORMS="linux/amd64" to narrow a build.
-PLATFORMS ?= linux/amd64 linux/arm64 windows/amd64
+PLATFORMS ?= linux/amd64 linux/arm64 windows/amd64 darwin/amd64 darwin/arm64
 
 .PHONY: all build test install release docs-examples clean
 
