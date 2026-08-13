@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Release builds now also target macOS (`darwin/amd64` and `darwin/arm64`),
+  alongside the existing Linux and Windows targets.
+
 ### Changed
 
 - The repo's own CI now regenerates `AGENTS.md` (`repoctx generate .`) and

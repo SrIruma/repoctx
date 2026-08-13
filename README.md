@@ -165,7 +165,7 @@ Every ecosystem detected by the scanner has a first-class adapter — nothing is
 make test      # go test ./...
 make build     # bin/repoctx
 make install   # $GOBIN/repoctx
-make release VERSION=v1.0.0   # dist/repoctx_linux_amd64, repoctx_linux_arm64, repoctx_windows_amd64.exe + SHA256SUMS.txt
+make release VERSION=v1.0.0   # dist/repoctx_{linux_amd64,linux_arm64,windows_amd64.exe,darwin_amd64,darwin_arm64} + SHA256SUMS.txt
 ```
 
 ## Community
