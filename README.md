@@ -187,6 +187,15 @@ scripts/dogfood.sh /path/to/repo  # run repoctx against a project you actually w
 - [Security](SECURITY.md) — how to report a vulnerability.
 - [Issues](https://github.com/SrIruma/repoctx/issues) — report bugs and request features.
 
+## Support
+
+[![Donate](https://img.shields.io/badge/Donate-BTC%20%7C%20USDT-e6007a?style=for-the-badge)](docs/donate.md)
+
+repoctx is free and MIT-licensed. If it saves you time, consider a small
+donation in BTC or USDT (TRC-20) — see [docs/donate.md](docs/donate.md) for
+the addresses and network details. Donations are optional and buy nothing;
+they just keep the project going.
+
 ## License
 
 [MIT](LICENSE)
