@@ -83,6 +83,12 @@ func loadProject(dir string, opts resolved) (*project.Project, error) {
 		}
 		m.Language = ad.Language()
 		m.Commands = md.Commands
+		if m.Commands == nil {
+			// A successful extraction with no commands must serialize as []
+			// (not null). null is reserved for extraction failure, signalled
+			// by the errors field below.
+			m.Commands = []project.Command{}
+		}
 		m.Deps = md.Deps
 	}
 	return p, nil
