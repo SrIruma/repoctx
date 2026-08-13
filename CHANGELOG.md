@@ -46,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `info --json` emits `manifests[].commands: null` (not `[]`) when a manifest
   has no commands, which the documented contract reserves for *extraction
-  failure*. Contract is frozen post-1.0, so this is left for a future major.
+  failure*. The contract is not yet frozen, so this can be revised before 1.0.0.
 - The scanner descends into test-data manifests (e.g. `psf/black`'s
   `tests/data/*/pyproject.toml`) and emits commands for them, since the skip
   list is name-based. This is the main source of command-count noise on real

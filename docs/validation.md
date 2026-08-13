@@ -81,8 +81,8 @@ Findings that came out of this first pass:
 - **`manifests[].commands` is `null`, not `[]`, when a manifest has no
   commands** (e.g. `rustlings/website/package.json`). The documented contract
   (docs/contract.md) says `null` means *extraction failed*, so "no scripts" is
-  indistinguishable from "adapter broke". Not changed here (contract is frozen
-  post-1.0); worth a contract amendment or a `[]` in a future major.
+  indistinguishable from "adapter broke". Not changed here; worth a contract
+  revision when the contract is frozen.
 - **The scanner descends into test-data manifests.** Black's
   `tests/data/*/pyproject.toml` files are compatibility fixtures, not projects,
   but the scanner emits `pytest` for each. The skip list is name-based
@@ -91,18 +91,20 @@ Findings that came out of this first pass:
 
 ### Dogfood rotation (2026-08-12)
 
-Run against two real, non-fixture projects:
+First smoke test against two real, non-fixture codebases (a local npm + Go
+polyglot project and a local Rust single-crate project; not named, not
+maintained):
 
-- `oneblock` (npm + Go polyglot): `package.json` (6 scripts: `build`,
-  `build:all`, `build:dev`, `go:build`, `go:build:all`, `package`, `watch`) and
-  a nested `cli/go.mod` (10 modules). No `AGENTS.md` / `CLAUDE.md`, so
-  `audit`/`generate` were skipped — the first step for this project is
-  bootstrapping a context file (`repoctx generate .`).
-- `prueba` (Rust single crate): `Cargo.toml` with 3 deps, full command set
-  (`cargo build`, `test`, `run`, `fmt --check`, `clippy`). Same bootstrap
-  note; its existing `CONTEXTO.md` has no repoctx markers, and files without
-  markers are never rewritten by design.
+- npm + Go polyglot: `package.json` (6 scripts: `build`, `build:all`,
+  `build:dev`, `go:build`, `go:build:all`, `package`, `watch`) and a nested
+  `cli/go.mod` (10 modules). No `AGENTS.md` / `CLAUDE.md`, so `audit`/`generate`
+  were skipped — the first step for this project is bootstrapping a context
+  file (`repoctx generate .`).
+- Rust single crate: `Cargo.toml` with 3 deps, full command set (`cargo
+  build`, `test`, `run`, `fmt --check`, `clippy`). Same bootstrap note; its
+  existing context file has no repoctx markers, and files without markers are
+  never rewritten by design.
 
-Neither project could be audited yet, which is itself a signal: the audit
+Neither codebase could be audited yet, which is itself a signal: the audit
 story only starts once a context file with markers exists. The rotation script
 is the tool to bootstrap and then keep that file honest over time.
