@@ -7,6 +7,8 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/SrIruma/repoctx)](https://goreportcard.com/report/github.com/SrIruma/repoctx)
 [![License](https://img.shields.io/github/license/SrIruma/repoctx)](LICENSE)
 
+> **Status:** stable (v1.0.0). Development is paused until real-world feedback. Feedback and issues are welcome.
+
 repoctx keeps your AI coding-agent context files (`AGENTS.md`, `CLAUDE.md`) truthful. It scans a repository, extracts facts from the real code — build/test commands, module structure, dependencies — and uses them to regenerate the factual sections of your context files, preserving anything a human wrote.
 
 ![repoctx demo](docs/demo.gif)
