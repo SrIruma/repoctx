@@ -11,6 +11,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Release builds now also target macOS (`darwin/amd64` and `darwin/arm64`),
   alongside the existing Linux and Windows targets.
+- `docs/validation.md` documents how repoctx is validated against real code
+  instead of only its own fixtures, closing the self-referential gap in the
+  dogfooding: the CI dogfood gate proves consistency, not truth.
+- `scripts/corpus.sh` is an external-corpus benchmark: it clones real
+  repositories at pinned SHAs (`spf13/cobra`, `expressjs/express`,
+  `psf/black`, `rust-lang/rustlings`), runs `repoctx info`, and diffs the
+  extracted commands against hand-reviewed golden files in
+  `testdata/corpus/golden/`. `--fail` turns any drift into a CI failure; the
+  golden files encode *expected* facts, so an adapter regression that silently
+  drops or invents a command is caught.
+- `scripts/dogfood.sh` runs repoctx against repositories you actually work on
+  (read-only): it reports what the scanner extracts and what `generate --dry-run`
+  would change in their context files.
+- `TestAuditFlagsLiveRotInCLAUDE` exercises the audit against a hand-maintained
+  `CLAUDE.md` fixture that contains real rot (a ghost command and a stale
+  path) — the scenario the repo's own dogfooding can never produce.
+- `TestSelfAGENTSKeepsCriticalFacts` pins the facts this repo's `AGENTS.md`
+  must never silently lose (`make test`, `go test ./...`, `go vet ./...`,
+  the `go.mod` module row), so an adapter regression shows up even if the
+  generated diff looks plausible.
 
 ### Changed
 
@@ -18,6 +38,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   fails on any diff, closing the dogfooding gap: `audit --check` catches rot
   (claims that lie), this gate catches omissions (new commands or modules not
   yet in the tables). Documented in CONTRIBUTING.md.
+- The paused-development status note in the README is replaced by a pointer to
+  `docs/validation.md`; validation tooling is now part of the test suite.
+- CI gains a `validation` job that runs the external-corpus benchmark.
+
+### Known findings (first corpus pass)
+
+- `info --json` emits `manifests[].commands: null` (not `[]`) when a manifest
+  has no commands, which the documented contract reserves for *extraction
+  failure*. The contract is not yet frozen, so this can be revised before 1.0.0.
+- The scanner descends into test-data manifests (e.g. `psf/black`'s
+  `tests/data/*/pyproject.toml`) and emits commands for them, since the skip
+  list is name-based. This is the main source of command-count noise on real
+  repos.
 
 ## [v1.0.0] - 2026-08-12
 

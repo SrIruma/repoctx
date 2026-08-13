@@ -72,6 +72,8 @@ The code is split into small, single-purpose packages:
 | `go test ./...` | `tests/fixtures/go/go.mod` |
 | `go vet ./...` | `tests/fixtures/go/go.mod` |
 | `gofmt -l .` | `tests/fixtures/go/go.mod` |
+| `npm run lint` | `tests/fixtures/live/package.json` |
+| `npm run test` | `tests/fixtures/live/package.json` |
 | `make build` | `tests/fixtures/make/Makefile` |
 | `make clean` | `tests/fixtures/make/Makefile` |
 | `make test` | `tests/fixtures/make/Makefile` |
@@ -118,6 +120,7 @@ The code is split into small, single-purpose packages:
 | `tests/fixtures/composer/composer.json` | PHP | monolog/monolog, php, phpunit/phpunit |
 | `tests/fixtures/go/go.mod` | Go | github.com/spf13/cobra, github.com/stretchr/testify |
 | `tests/fixtures/gradle/build.gradle` | Gradle | com.fasterxml.jackson.core:jackson-databind:2.17.0, com.google.guava:guava:33.2.0-jre, org.junit.jupiter:junit-jupiter:5.10.2, org.projectlombok:lombok:1.18.32 |
+| `tests/fixtures/live/package.json` | JavaScript/TypeScript | typescript |
 | `tests/fixtures/make/Makefile` | Generic (Make) |  |
 | `tests/fixtures/maven/pom.xml` | Java | junit:junit, org.springframework.boot:spring-boot-starter-web:3.2.0 |
 | `tests/fixtures/meson/meson.build` | C/C++ | glib-2.0, gtk+-3.0 |

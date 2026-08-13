@@ -105,6 +105,40 @@ func TestAuditHealthy(t *testing.T) {
 	}
 }
 
+// TestAuditFlagsLiveRotInCLAUDE is the "live negative" test: a hand-maintained
+// CLAUDE.md with real rot — a ghost command inside the markers and a stale
+// path in human prose — must be flagged by the audit end to end. This is the
+// scenario the repo's own dogfooding can never produce (its context files are
+// regenerated right before the audit), so it lives here against a fixture.
+func TestAuditFlagsLiveRotInCLAUDE(t *testing.T) {
+	dir := filepath.Join("..", "..", "tests", "fixtures", "live")
+	r, err := Run(Options{
+		Root:   dir,
+		File:   filepath.Join(dir, "CLAUDE.md"),
+		Actual: extractActual(t, dir),
+	})
+	if err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+	if r.Passed || r.Score >= 100 {
+		t.Errorf("expected failed report, got score=%d passed=%v", r.Score, r.Passed)
+	}
+	cc := checkByName(r, "commands")
+	if cc == nil || cc.Passed {
+		t.Fatalf("expected commands check to fail, got %+v", cc)
+	}
+	if len(cc.Issues) != 1 || cc.Issues[0].Command != "npm run deploy" {
+		t.Errorf("expected one ghost command 'npm run deploy', got %+v", cc.Issues)
+	}
+	pc := checkByName(r, "paths")
+	if pc == nil || pc.Passed {
+		t.Fatalf("expected paths check to fail, got %+v", pc)
+	}
+	if len(pc.Issues) != 1 || pc.Issues[0].Path != "docs/architecture-2024.md" {
+		t.Errorf("expected stale path 'docs/architecture-2024.md', got %+v", pc.Issues)
+	}
+}
+
 func TestAuditNoMarkersSkipsCommandsCheck(t *testing.T) {
 	dir := fixtureDir(t, "healthy")
 	r, err := Run(Options{

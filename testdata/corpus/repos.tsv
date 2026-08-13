@@ -1,0 +1,5 @@
+name	url	sha
+cobra	https://github.com/spf13/cobra.git	adbc8813901bba65827259daa8e22ff94ec1f30e
+express	https://github.com/expressjs/express.git	a3714473feb3d2908add734d340e7755fd85e0a3
+black	https://github.com/psf/black.git	74371e2041a3120a049ced8f1cab0e7a6bc8ecd3
+rustlings	https://github.com/rust-lang/rustlings.git	02b22b49e7349b36305dbe97cd5d6e198d2f0537
