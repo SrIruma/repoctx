@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The repo's own CI now regenerates `AGENTS.md` (`repoctx generate .`) and
+  fails on any diff, closing the dogfooding gap: `audit --check` catches rot
+  (claims that lie), this gate catches omissions (new commands or modules not
+  yet in the tables). Documented in CONTRIBUTING.md.
+
 ## [v1.0.0] - 2026-08-12
 
 ### Added
