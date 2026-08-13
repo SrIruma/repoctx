@@ -31,6 +31,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   must never silently lose (`make test`, `go test ./...`, `go vet ./...`,
   the `go.mod` module row), so an adapter regression shows up even if the
   generated diff looks plausible.
+- `docs/donate.md` and `.github/FUNDING.yml` add a donation page (BTC and
+  USDT/TRC-20 addresses) and a GitHub "Sponsor" button pointing to it.
 
 ### Changed
 
