@@ -1,0 +1,12 @@
+Makefile	make all
+Makefile	make clean
+Makefile	make default
+Makefile	make fmt
+Makefile	make install_deps
+Makefile	make lint
+Makefile	make richtest
+Makefile	make test
+go.mod	go build ./...
+go.mod	go test ./...
+go.mod	go vet ./...
+go.mod	gofmt -l .

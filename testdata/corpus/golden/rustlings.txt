@@ -1,0 +1,20 @@
+Cargo.toml	cargo build
+Cargo.toml	cargo clippy
+Cargo.toml	cargo fmt --check
+Cargo.toml	cargo run
+Cargo.toml	cargo test
+dev/Cargo.toml	cargo build
+dev/Cargo.toml	cargo clippy
+dev/Cargo.toml	cargo fmt --check
+dev/Cargo.toml	cargo run
+dev/Cargo.toml	cargo test
+rustlings-macros/Cargo.toml	cargo build
+rustlings-macros/Cargo.toml	cargo clippy
+rustlings-macros/Cargo.toml	cargo fmt --check
+rustlings-macros/Cargo.toml	cargo run
+rustlings-macros/Cargo.toml	cargo test
+tests/test_exercises/dev/Cargo.toml	cargo build
+tests/test_exercises/dev/Cargo.toml	cargo clippy
+tests/test_exercises/dev/Cargo.toml	cargo fmt --check
+tests/test_exercises/dev/Cargo.toml	cargo run
+tests/test_exercises/dev/Cargo.toml	cargo test

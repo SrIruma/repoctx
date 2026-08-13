@@ -38,3 +38,15 @@ jobs:
         run: make docs-examples
       - name: Fail if the cookbook drifted
         run: git diff --exit-code docs/examples.md
+
+  validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - run: go build ./...
+      - name: External-corpus benchmark (real repos at pinned SHAs)
+        run: bash scripts/corpus.sh --fail

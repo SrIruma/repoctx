@@ -1,0 +1,6 @@
+package.json	npm run lint
+package.json	npm run lint:fix
+package.json	npm run test
+package.json	npm run test-ci
+package.json	npm run test-cov
+package.json	npm run test-tap

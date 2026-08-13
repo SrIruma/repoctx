@@ -1,0 +1,9 @@
+docs/Makefile	make help
+docs/compatible_configs/isort/pyproject.toml	pytest
+docs/compatible_configs/pylint/pyproject.toml	pytest
+pyproject.toml	mypy .
+pyproject.toml	pytest
+tests/data/include_exclude_tests/pyproject.toml	pytest
+tests/data/invalid_gitignore_tests/pyproject.toml	pytest
+tests/data/invalid_nested_gitignore_tests/pyproject.toml	pytest
+tests/data/nested_gitignore_tests/pyproject.toml	pytest
