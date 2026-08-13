@@ -7,7 +7,8 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/SrIruma/repoctx)](https://goreportcard.com/report/github.com/SrIruma/repoctx)
 [![License](https://img.shields.io/github/license/SrIruma/repoctx)](LICENSE)
 
-> **Status:** stable (v1.0.0). Development is paused until real-world feedback. Feedback and issues are welcome.
+> **Status:** stable (v1.0.0). Validation against real repositories is now part
+> of the test suite — see [Validation](docs/validation.md). Feedback and issues are welcome.
 
 repoctx keeps your AI coding-agent context files (`AGENTS.md`, `CLAUDE.md`) truthful. It scans a repository, extracts facts from the real code — build/test commands, module structure, dependencies — and uses them to regenerate the factual sections of your context files, preserving anything a human wrote.
 
@@ -168,11 +169,14 @@ make test      # go test ./...
 make build     # bin/repoctx
 make install   # $GOBIN/repoctx
 make release VERSION=v1.0.0   # dist/repoctx_{linux_amd64,linux_arm64,windows_amd64.exe,darwin_amd64,darwin_arm64} + SHA256SUMS.txt
+scripts/corpus.sh --fail  # external-corpus benchmark against real repos (see docs/validation.md)
+scripts/dogfood.sh /path/to/repo  # run repoctx against a project you actually work on
 ```
 
 ## Community
 
 - [Contributing](CONTRIBUTING.md) — how to set up, branch, commit, and test.
+- [Validation](docs/validation.md) — how repoctx is checked against real code, not just its own fixtures.
 - [Changelog](CHANGELOG.md) — release history.
 - [Contract](docs/contract.md) — exit codes, JSON schemas and contract flags.
 - [Examples](docs/examples.md) — verified usage in every case (generated).

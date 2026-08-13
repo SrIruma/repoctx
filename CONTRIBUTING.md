@@ -13,6 +13,9 @@ welcome: bug reports, feature requests, documentation, and code.
 - `internal/markdown/` — marker-aware parsing and rendering of context files.
 - `internal/audit/` — rot checks and report scoring.
 - `tests/fixtures/` — fixture projects used by the test suite.
+- `scripts/corpus.sh` — external-corpus benchmark (real repos at pinned SHAs,
+  see `docs/validation.md`).
+- `scripts/dogfood.sh` — read-only run of repoctx against your own projects.
 
 ## Development environment
 
@@ -55,6 +58,12 @@ go test ./...
 - Adapters and scanning behaviour are covered by fixture projects under
   `tests/fixtures/` (one directory per ecosystem, plus `scanner/mono` for
   monorepos and `audit/{ghost,stale,healthy}` for the rot checks).
+  `tests/fixtures/live/` is a hand-maintained `CLAUDE.md` with real rot; it is
+  not a "healthy" fixture — the audit must keep failing on it.
+- When an adapter or the scanner changes command extraction, run
+  `scripts/corpus.sh` and review the golden diff by hand (see
+  `docs/validation.md`). The golden files encode expected facts, not repoctx's
+  own output.
 - When adding an adapter or changing extraction logic, add or update fixtures
   and tests in the same commit.
 - `audit` output is written through `cmd.OutOrStdout()` so CLI tests can
