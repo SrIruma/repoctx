@@ -1,8 +1,10 @@
-# Migration guide: 0.x → 1.0.0
+# Migration guide: 0.x → 1.0.0 (upcoming)
 
-repoctx reaches `1.0.0` when the machine contract documented in
-[docs/contract.md](contract.md) is frozen. This guide summarizes what a 0.x
-user needs to know to move to 1.0.0.
+repoctx is on 0.x. The machine contract documented in
+[docs/contract.md](contract.md) is **not frozen** yet: breaking changes are
+allowed without a major bump while the tool is validated in real use. `1.0.0`
+will be released when that contract is frozen. This guide covers what moving
+between 0.x releases looks like, so the path to 1.0.0 stays smooth.
 
 ## Upgrade in three steps
 
@@ -28,8 +30,8 @@ user needs to know to move to 1.0.0.
 
 ## What changed on the way to 1.0.0
 
-Everything below was merged during the `0.x` series and is solidified by
-`1.0.0`.
+Everything below was merged during the `0.x` series. It is what a `1.0.0`
+release will solidify once the contract is frozen.
 
 ### Configuration
 
@@ -78,11 +80,11 @@ Everything below was merged during the `0.x` series and is solidified by
 ## Checklist for JSON consumers
 
 If your scripts or CI parse `repoctx --json` output, verify these before
-moving to 1.0.0:
+building on the contract:
 
 - [ ] Handle a non-zero exit from `audit --check` as "context is rotting".
 - [ ] Treat a manifest with an `errors` field as unparsed (its `commands` is
       `null`), not as a scan failure.
 - [ ] Use the `--file`, `--config`, `--max-depth` and `--skip-dirs` flags only
-      with the documented contracts in mind; from `1.0.0` their behaviour is
-      part of the frozen contract.
+      with the documented contracts in mind; today their behaviour can still
+      change (0.x), and it will be frozen at `1.0.0`.

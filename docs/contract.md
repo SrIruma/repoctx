@@ -1,10 +1,13 @@
 # Contract
 
-This document describes the stable, machine-observable contract of the
+This document describes the machine-observable contract of the
 `repoctx` CLI: exit codes, JSON schemas and the flags that shape output.
 It is the specification that downstream consumers (scripts, CI gates, editors)
 can rely on. Every JSON example in this document is verified against real
 command output and pinned by golden tests in `internal/cli/testdata`.
+
+The contract is documented but not frozen: repoctx is on 0.x, and breaking
+changes are allowed (and will be called out in the changelog) until 1.0.0.
 
 Throughout this document `<repo>` is a placeholder for the absolute path of
 the scanned directory; real output emits absolute paths.

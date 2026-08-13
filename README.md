@@ -7,8 +7,10 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/SrIruma/repoctx)](https://goreportcard.com/report/github.com/SrIruma/repoctx)
 [![License](https://img.shields.io/github/license/SrIruma/repoctx)](LICENSE)
 
-> **Status:** stable (v1.0.0). Validation against real repositories is now part
-> of the test suite — see [Validation](docs/validation.md). Feedback and issues are welcome.
+> **Status:** pre-1.0 (0.x), active development. The machine contract
+> (docs/contract.md) is documented but deliberately not frozen while the tool
+> is validated in real use — validation against real repositories is part of
+> the test suite, see [Validation](docs/validation.md). Feedback and issues are welcome.
 
 repoctx keeps your AI coding-agent context files (`AGENTS.md`, `CLAUDE.md`) truthful. It scans a repository, extracts facts from the real code — build/test commands, module structure, dependencies — and uses them to regenerate the factual sections of your context files, preserving anything a human wrote.
 
@@ -168,7 +170,7 @@ Every ecosystem detected by the scanner has a first-class adapter — nothing is
 make test      # go test ./...
 make build     # bin/repoctx
 make install   # $GOBIN/repoctx
-make release VERSION=v1.0.0   # dist/repoctx_{linux_amd64,linux_arm64,windows_amd64.exe,darwin_amd64,darwin_arm64} + SHA256SUMS.txt
+make release VERSION=v0.5.0   # dist/repoctx_{linux_amd64,linux_arm64,windows_amd64.exe,darwin_amd64,darwin_arm64} + SHA256SUMS.txt
 scripts/corpus.sh --fail  # external-corpus benchmark against real repos (see docs/validation.md)
 scripts/dogfood.sh /path/to/repo  # run repoctx against a project you actually work on
 ```
@@ -180,7 +182,7 @@ scripts/dogfood.sh /path/to/repo  # run repoctx against a project you actually w
 - [Changelog](CHANGELOG.md) — release history.
 - [Contract](docs/contract.md) — exit codes, JSON schemas and contract flags.
 - [Examples](docs/examples.md) — verified usage in every case (generated).
-- [Migration](docs/migration.md) — what changes between 0.x and 1.0.0.
+- [Migration](docs/migration.md) — the contract, 0.x changes, and the road to 1.0.0.
 - [Code of Conduct](CODE_OF_CONDUCT.md) — community guidelines.
 - [Security](SECURITY.md) — how to report a vulnerability.
 - [Issues](https://github.com/SrIruma/repoctx/issues) — report bugs and request features.

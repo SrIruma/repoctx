@@ -25,7 +25,7 @@ The code is split into small, single-purpose packages:
 
 - Conventional commits (`feat:`, `fix:`, `docs:`, `test:`, `chore:`).
 - `main` is always releasable; work in feature branches.
-- Releases use plain tags (`v1.0.0`), injected into `internal/cli.version` via `-ldflags`.
+- Releases use plain tags (`vX.Y.Z`), injected into `internal/cli.version` via `-ldflags`.
 - Public-facing code and docs in English; working notes may be in Spanish.
 - Commands are atomic and factual: `generate` never touches human-written content outside markers.
 - This repository is dogfooded: the Commands/Modules tables below are generated

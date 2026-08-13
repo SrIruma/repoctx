@@ -52,7 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   list is name-based. This is the main source of command-count noise on real
   repos.
 
-## [v1.0.0] - 2026-08-12
+## [v0.5.0] - 2026-08-13
 
 ### Added
 
@@ -67,13 +67,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Golden tests in `internal/cli/testdata` pin the exact `info --json` and
   `audit --json` output (`go test ./internal/cli -run TestGoldenJSON
   -update` to regenerate snapshots).
-- `docs/migration.md` is a 0.x → 1.0.0 migration guide covering the config
-  file, new flags, JSON schema changes and the exit-code contract.
-- CONTRIBUTING.md defines the post-1.0 semver policy: breaking changes
-  (including contract changes) → major, features → minor, fixes → patch.
+- `docs/migration.md` covers the contract and how 1.0.0 will land.
+- CONTRIBUTING.md defines the planned post-1.0 semver policy: breaking
+  changes (including contract changes) → major, features → minor, fixes →
+  patch.
 
-From this release the machine contract (exit codes and `--json` schemas in
-`docs/contract.md`) is frozen: contract changes require a major version bump.
+The machine contract (exit codes and `--json` schemas in `docs/contract.md`)
+is documented and pinned by golden tests, but it is **not frozen** while the
+project is on 0.x: contract changes are allowed without a major bump until
+1.0.0. This release was previously numbered v1.0.0; that release was
+retracted so the contract stays open while the tool is validated in real use.
 
 ## [v0.4.0] - 2026-08-12
 
@@ -188,8 +191,8 @@ From this release the machine contract (exit codes and `--json` schemas in
   meson) are detected and reported.
 - CI workflow (`go vet`, `go build`, `go test`) on push to `main` and PRs.
 
-[Unreleased]: https://github.com/SrIruma/repoctx/compare/v1.0.0...HEAD
-[v1.0.0]: https://github.com/SrIruma/repoctx/compare/v0.4.0...v1.0.0
+[Unreleased]: https://github.com/SrIruma/repoctx/compare/v0.5.0...HEAD
+[v0.5.0]: https://github.com/SrIruma/repoctx/compare/v0.4.0...v0.5.0
 [v0.4.0]: https://github.com/SrIruma/repoctx/compare/v0.3.0...v0.4.0
 [v0.3.0]: https://github.com/SrIruma/repoctx/compare/v0.2.0...v0.3.0
 [v0.2.0]: https://github.com/SrIruma/repoctx/compare/v0.1.0...v0.2.0

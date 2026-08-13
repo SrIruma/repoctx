@@ -92,8 +92,8 @@ repoctx follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Releases use plain tags (`vX.Y.Z`) with the version injected at build time via
 `-ldflags` (see `make release VERSION=vX.Y.Z`).
 
-While the project is on `0.x`, any release may break compatibility. Starting
-with `1.0.0` the policy is:
+While the project is on `0.x`, any release may break compatibility. The
+planned policy from `1.0.0` (when the machine contract is frozen) is:
 
 | Kind of change | Version bump | Examples |
 |---|---|---|
@@ -101,11 +101,12 @@ with `1.0.0` the policy is:
 | Feature | Minor (`x.Y.0`) | New adapters, new flags, new output — anything additive and non-breaking. |
 | Fix | Patch (`x.y.Z`) | Bug fixes, doc corrections, internal refactors. |
 
-The machine contract in `docs/contract.md` is frozen from `1.0.0` onward:
-changing the JSON schemas or exit codes requires a deliberate major bump.
-Golden tests in `internal/cli/testdata` pin the contract output; regenerate
-snapshots (`go test ./internal/cli -run TestGoldenJSON -update`) only as part
-of that major bump, with a CHANGELOG entry and release note to match.
+The machine contract in `docs/contract.md` is documented and pinned by golden
+tests in `internal/cli/testdata`, but it is **not frozen** on 0.x: changing
+the JSON schemas or exit codes is allowed (with a CHANGELOG entry), and it
+will become a deliberate major bump only from `1.0.0`. Regenerate the golden
+snapshots (`go test ./internal/cli -run TestGoldenJSON -update`) whenever the
+contract output intentionally changes.
 
 ## Getting help
 
