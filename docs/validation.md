@@ -78,11 +78,10 @@ documented adapter contract, not literal manifest keys.
 
 Findings that came out of this first pass:
 
-- **`manifests[].commands` is `null`, not `[]`, when a manifest has no
-  commands** (e.g. `rustlings/website/package.json`). The documented contract
-  (docs/contract.md) says `null` means *extraction failed*, so "no scripts" is
-  indistinguishable from "adapter broke". Not changed here; worth a contract
-  revision when the contract is frozen.
+- ~~**`manifests[].commands` is `null`, not `[]`, when a manifest has no
+  commands**~~ — **resolved.** `rustlings/website/package.json` and similar
+  now serialize `[]` on success; `null` is reserved for extraction failure
+  (present only with the `errors` field). Fixed in v0.5.0.
 - **The scanner descends into test-data manifests.** Black's
   `tests/data/*/pyproject.toml` files are compatibility fixtures, not projects,
   but the scanner emits `pytest` for each. The skip list is name-based

@@ -42,11 +42,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `docs/validation.md`; validation tooling is now part of the test suite.
 - CI gains a `validation` job that runs the external-corpus benchmark.
 
+### Fixed
+
+- `info --json` now emits `manifests[].commands: []` (not `null`) when a
+  manifest extracted successfully but has no commands. `null` remains reserved
+  for extraction failure, signalled by the `errors` field — the two cases are
+  now distinguishable (previously `rustlings/website/package.json` and a broken
+  adapter looked identical).
+
 ### Known findings (first corpus pass)
 
-- `info --json` emits `manifests[].commands: null` (not `[]`) when a manifest
-  has no commands, which the documented contract reserves for *extraction
-  failure*. The contract is not yet frozen, so this can be revised before 1.0.0.
 - The scanner descends into test-data manifests (e.g. `psf/black`'s
   `tests/data/*/pyproject.toml`) and emits commands for them, since the skip
   list is name-based. This is the main source of command-count noise on real
