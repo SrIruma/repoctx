@@ -1,6 +1,7 @@
 package adapters
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -41,10 +42,101 @@ func TestNPMAdapter(t *testing.T) {
 	if !hasCommand(md.Commands, "test", "npm run test") {
 		t.Errorf("missing npm run test command: %v", md.Commands)
 	}
+	if md.PackageManager != "npm" {
+		t.Errorf("expected package manager npm, got %q", md.PackageManager)
+	}
 	for _, dep := range []string{"react", "typescript"} {
 		if !contains(md.Deps, dep) {
 			t.Errorf("missing dependency %q in %v", dep, md.Deps)
 		}
+	}
+}
+
+func TestYarnAdapter(t *testing.T) {
+	ad := npmAdapter{}
+	md, err := ad.Read(fixture(t, "yarn/package.json"))
+	if err != nil {
+		t.Fatalf("read: %v", err)
+	}
+	if md.PackageManager != "yarn" {
+		t.Fatalf("expected package manager yarn, got %q", md.PackageManager)
+	}
+	for _, name := range []string{"test", "build", "lint"} {
+		if !hasCommand(md.Commands, name, "yarn run "+name) {
+			t.Errorf("missing yarn run %s command: %v", name, commandNames(md.Commands))
+		}
+	}
+}
+
+func TestPnpmAdapter(t *testing.T) {
+	ad := npmAdapter{}
+	md, err := ad.Read(fixture(t, "pnpm/package.json"))
+	if err != nil {
+		t.Fatalf("read: %v", err)
+	}
+	if md.PackageManager != "pnpm" {
+		t.Fatalf("expected package manager pnpm, got %q", md.PackageManager)
+	}
+	for _, name := range []string{"test", "build"} {
+		if !hasCommand(md.Commands, name, "pnpm run "+name) {
+			t.Errorf("missing pnpm run %s command: %v", name, commandNames(md.Commands))
+		}
+	}
+}
+
+func TestBunAdapter(t *testing.T) {
+	ad := npmAdapter{}
+	md, err := ad.Read(fixture(t, "bun/package.json"))
+	if err != nil {
+		t.Fatalf("read: %v", err)
+	}
+	if md.PackageManager != "bun" {
+		t.Fatalf("expected package manager bun, got %q", md.PackageManager)
+	}
+	for _, name := range []string{"test", "build"} {
+		if !hasCommand(md.Commands, name, "bun run "+name) {
+			t.Errorf("missing bun run %s command: %v", name, commandNames(md.Commands))
+		}
+	}
+}
+
+func TestDetectPackageManager(t *testing.T) {
+	write := func(t *testing.T, dir, name string) {
+		t.Helper()
+		if err := os.WriteFile(filepath.Join(dir, name), []byte("# placeholder\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	cases := []struct {
+		name     string
+		field    string
+		lockfile string
+		want     string
+	}{
+		{"corepack field wins", "yarn@4.18.0", "package-lock.json", "yarn"},
+		{"corepack pnpm field", "pnpm@10.0.0", "", "pnpm"},
+		{"corepack bun field", "bun@1.0.0", "", "bun"},
+		{"corepack npm field", "npm@10.0.0", "", "npm"},
+		{"corepack field with hash suffix", "yarn@3.2.3+sha224.953c8b0", "", "yarn"},
+		{"yarn.lock detected", "", "yarn.lock", "yarn"},
+		{"pnpm lockfile detected", "", "pnpm-lock.yaml", "pnpm"},
+		{"bun.lock detected", "", "bun.lock", "bun"},
+		{"bun.lockb detected", "", "bun.lockb", "bun"},
+		{"package-lock.json detected", "", "package-lock.json", "npm"},
+		{"no signal defaults to npm", "", "", "npm"},
+		{"unknown field falls back to lockfile", "corepack@0.24.0", "yarn.lock", "yarn"},
+		{"unknown field alone defaults to npm", "corepack@0.24.0", "", "npm"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			dir := t.TempDir()
+			if tc.lockfile != "" {
+				write(t, dir, tc.lockfile)
+			}
+			if got := detectPackageManager(tc.field, dir); got != tc.want {
+				t.Errorf("detectPackageManager(%q, %q) = %q, want %q", tc.field, tc.lockfile, got, tc.want)
+			}
+		})
 	}
 }
 

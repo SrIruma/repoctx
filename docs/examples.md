@@ -84,7 +84,8 @@ $ repoctx info tests/fixtures/scanner/mono --json
           "name": "test",
           "cmd": "npm run test"
         }
-      ]
+      ],
+      "package_manager": "npm"
     },
     {
       "path": "tools/rust/Cargo.toml",
@@ -158,7 +159,8 @@ $ repoctx info tests/fixtures/scanner/corrupt --json
       ],
       "deps": [
         "typescript"
-      ]
+      ],
+      "package_manager": "npm"
     }
   ]
 }
@@ -351,7 +353,8 @@ $ repoctx info tests/fixtures/scanner/workspace-npm --json
           "name": "test",
           "cmd": "npm run test"
         }
-      ]
+      ],
+      "package_manager": "npm"
     },
     {
       "path": "packages/app/package.json",
@@ -366,7 +369,8 @@ $ repoctx info tests/fixtures/scanner/workspace-npm --json
       ],
       "deps": [
         "react"
-      ]
+      ],
+      "package_manager": "npm"
     },
     {
       "path": "packages/lib/package.json",
@@ -381,7 +385,8 @@ $ repoctx info tests/fixtures/scanner/workspace-npm --json
       ],
       "deps": [
         "typescript"
-      ]
+      ],
+      "package_manager": "npm"
     }
   ]
 }

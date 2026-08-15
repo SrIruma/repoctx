@@ -59,6 +59,8 @@ The code is split into small, single-purpose packages:
 | `make clean` | `tests/fixtures/audit/healthy/Makefile` |
 | `make test` | `tests/fixtures/audit/healthy/Makefile` |
 | `npm run test` | `tests/fixtures/audit/stale/package.json` |
+| `bun run build` | `tests/fixtures/bun/package.json` |
+| `bun run test` | `tests/fixtures/bun/package.json` |
 | `cargo build` | `tests/fixtures/cargo/Cargo.toml` |
 | `cargo test` | `tests/fixtures/cargo/Cargo.toml` |
 | `cargo run` | `tests/fixtures/cargo/Cargo.toml` |
@@ -83,6 +85,8 @@ The code is split into small, single-purpose packages:
 | `npm run build` | `tests/fixtures/npm/package.json` |
 | `npm run lint` | `tests/fixtures/npm/package.json` |
 | `npm run test` | `tests/fixtures/npm/package.json` |
+| `pnpm run build` | `tests/fixtures/pnpm/package.json` |
+| `pnpm run test` | `tests/fixtures/pnpm/package.json` |
 | `pytest` | `tests/fixtures/pyproject/pyproject.toml` |
 | `ruff check .` | `tests/fixtures/pyproject/pyproject.toml` |
 | `bundle exec puma` | `tests/fixtures/ruby/Gemfile` |
@@ -105,6 +109,9 @@ The code is split into small, single-purpose packages:
 | `cargo clippy` | `tests/fixtures/scanner/workspace-cargo/Cargo.toml` |
 | `npm run build` | `tests/fixtures/scanner/workspace-npm/package.json` |
 | `npm run test` | `tests/fixtures/scanner/workspace-npm/package.json` |
+| `yarn run build` | `tests/fixtures/yarn/package.json` |
+| `yarn run lint` | `tests/fixtures/yarn/package.json` |
+| `yarn run test` | `tests/fixtures/yarn/package.json` |
 
 ## Modules
 
@@ -115,6 +122,7 @@ The code is split into small, single-purpose packages:
 | `tests/fixtures/audit/ghost/package.json` | JavaScript/TypeScript | typescript |
 | `tests/fixtures/audit/healthy/Makefile` | Generic (Make) |  |
 | `tests/fixtures/audit/stale/package.json` | JavaScript/TypeScript |  |
+| `tests/fixtures/bun/package.json` | JavaScript/TypeScript | typescript |
 | `tests/fixtures/cargo/Cargo.toml` | Rust | anyhow, criterion, serde |
 | `tests/fixtures/cmake/CMakeLists.txt` | C/C++ | Boost, OpenSSL |
 | `tests/fixtures/composer/composer.json` | PHP | monolog/monolog, php, phpunit/phpunit |
@@ -125,6 +133,7 @@ The code is split into small, single-purpose packages:
 | `tests/fixtures/maven/pom.xml` | Java | junit:junit, org.springframework.boot:spring-boot-starter-web:3.2.0 |
 | `tests/fixtures/meson/meson.build` | C/C++ | glib-2.0, gtk+-3.0 |
 | `tests/fixtures/npm/package.json` | JavaScript/TypeScript | react, typescript |
+| `tests/fixtures/pnpm/package.json` | JavaScript/TypeScript | typescript |
 | `tests/fixtures/pyproject/pyproject.toml` | Python | click, requests |
 | `tests/fixtures/ruby/Gemfile` | Ruby | puma, rails, rspec |
 | `tests/fixtures/scanner/corrupt/broken/package.json` |  |  |
@@ -139,4 +148,5 @@ The code is split into small, single-purpose packages:
 | `tests/fixtures/scanner/poly5/pom.xml` | Java |  |
 | `tests/fixtures/scanner/workspace-cargo/Cargo.toml` | Rust | anyhow, serde |
 | `tests/fixtures/scanner/workspace-npm/package.json` | JavaScript/TypeScript |  |
+| `tests/fixtures/yarn/package.json` | JavaScript/TypeScript | react, typescript |
 <!-- repoctx:end -->

@@ -42,7 +42,8 @@
           "name": "test",
           "cmd": "npm run test"
         }
-      ]
+      ],
+      "package_manager": "npm"
     },
     {
       "path": "tools/rust/Cargo.toml",

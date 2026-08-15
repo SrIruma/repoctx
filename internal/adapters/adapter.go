@@ -8,6 +8,9 @@ import (
 type ManifestData struct {
 	Commands []project.Command
 	Deps     []string
+	// PackageManager is set only by the npm adapter: the tool that runs the
+	// package.json scripts (npm, yarn, pnpm or bun).
+	PackageManager string
 }
 
 // Adapter knows how to read one manifest format and turn it into facts.

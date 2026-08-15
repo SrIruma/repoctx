@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `package.json` commands now reflect the actual package manager instead of
+  always assuming npm: repoctx detects yarn, pnpm and bun from the corepack
+  `packageManager` field (e.g. `yarn@4.18.0`) or a sibling lockfile
+  (`yarn.lock`, `pnpm-lock.yaml`, `bun.lock`, `bun.lockb`), and emits
+  `yarn run <script>`, `pnpm run <script>` or `bun run <script>` accordingly.
+  `npm` remains the default when there is no signal. `info` surfaces the
+  detected tool as a new `manifests[].package_manager` field in `--json` and
+  in the human output, and `tests/fixtures/{yarn,pnpm,bun}` cover the new
+  adapters.
 - Release builds now also target macOS (`darwin/amd64` and `darwin/arm64`),
   alongside the existing Linux and Windows targets.
 - `docs/validation.md` documents how repoctx is validated against real code

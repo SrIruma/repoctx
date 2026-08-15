@@ -1,0 +1,30 @@
+{
+  "root": "<repo>/yarn",
+  "manifests": [
+    {
+      "path": "package.json",
+      "kind": "npm",
+      "language": "JavaScript/TypeScript",
+      "scope": ".",
+      "commands": [
+        {
+          "name": "build",
+          "cmd": "yarn run build"
+        },
+        {
+          "name": "lint",
+          "cmd": "yarn run lint"
+        },
+        {
+          "name": "test",
+          "cmd": "yarn run test"
+        }
+      ],
+      "deps": [
+        "react",
+        "typescript"
+      ],
+      "package_manager": "yarn"
+    }
+  ]
+}

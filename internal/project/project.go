@@ -33,6 +33,9 @@ type Manifest struct {
 	Scope    string       `json:"scope"`
 	Commands []Command    `json:"commands"`
 	Deps     []string     `json:"deps,omitempty"`
+	// PackageManager names the tool that runs a package.json's scripts
+	// (npm, yarn, pnpm or bun); only set for npm-kind manifests.
+	PackageManager string `json:"package_manager,omitempty"`
 	// Errors are per-manifest extraction failures. Best-effort extraction
 	// keeps the manifest in the project with zero facts and records why.
 	Errors []string `json:"errors,omitempty"`

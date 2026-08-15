@@ -36,6 +36,10 @@ func TestGoldenJSON(t *testing.T) {
 			args: []string{"info", filepath.Join(repo, "tests", "fixtures", "scanner", "corrupt"), "--json"},
 		},
 		{
+			name: "info_yarn",
+			args: []string{"info", filepath.Join(repo, "tests", "fixtures", "yarn"), "--json"},
+		},
+		{
 			name: "audit_healthy",
 			args: []string{"audit", filepath.Join(repo, "tests", "fixtures", "audit", "healthy"), "--json"},
 		},

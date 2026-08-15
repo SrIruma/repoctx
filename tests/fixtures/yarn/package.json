@@ -1,0 +1,16 @@
+{
+  "name": "yarn-fixture",
+  "version": "1.0.0",
+  "packageManager": "yarn@4.18.0",
+  "scripts": {
+    "test": "vitest run",
+    "build": "tsc -b",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "react": "^18.3.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

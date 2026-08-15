@@ -82,6 +82,7 @@ func loadProject(dir string, opts resolved) (*project.Project, error) {
 			continue
 		}
 		m.Language = ad.Language()
+		m.PackageManager = md.PackageManager
 		m.Commands = md.Commands
 		if m.Commands == nil {
 			// A successful extraction with no commands must serialize as []
@@ -111,8 +112,12 @@ func printHuman(w io.Writer, root string, p *project.Project) error {
 		for _, c := range m.Commands {
 			names = append(names, c.Name)
 		}
+		kind := string(m.Kind)
+		if m.PackageManager != "" {
+			kind = m.PackageManager
+		}
 		fmt.Fprintf(w, "  %-28s %-10s %-22s commands: [%s]  (%d deps)\n",
-			m.Path, m.Kind, m.Language, strings.Join(names, ", "), len(m.Deps))
+			m.Path, kind, m.Language, strings.Join(names, ", "), len(m.Deps))
 		for _, err := range m.Errors {
 			fmt.Fprintf(w, "  ! %s: %s\n", m.Path, err)
 		}

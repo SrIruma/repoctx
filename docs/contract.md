@@ -81,6 +81,7 @@ return the code silently.
 | `manifests[].language` | string | Display name; empty when extraction failed. |
 | `manifests[].scope` | string | Directory of the manifest (`"."` at the root). |
 | `manifests[].commands` | array | `{name, cmd}` pairs; `null` when extraction failed. |
+| `manifests[].package_manager` | string | npm-kind only: `npm`, `yarn`, `pnpm` or `bun` — the tool that runs the package.json scripts. Detected from the corepack `packageManager` field, then from a sibling lockfile (`yarn.lock`, `pnpm-lock.yaml`, `bun.lock`, `bun.lockb`, `package-lock.json`, `npm-shrinkwrap.json`); `npm` when there is no signal. Commands use the matching prefix (`yarn run build`, `pnpm run test`, `bun run lint`). |
 | `manifests[].deps` | array | Omitted when empty. |
 | `manifests[].errors` | array | Extraction failures; present only when the manifest could not be parsed. |
 | `detected_other` | array | Reserved for detected-but-unsupported manifests; currently never emitted. |

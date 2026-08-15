@@ -1,0 +1,11 @@
+{
+  "name": "pnpm-fixture",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "vitest run",
+    "build": "tsc -b"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

@@ -24,7 +24,8 @@
       ],
       "deps": [
         "typescript"
-      ]
+      ],
+      "package_manager": "npm"
     }
   ]
 }

@@ -77,6 +77,10 @@ workspace root and each member package. Commands are attributed per manifest:
 
 - the root `package.json` contributes its own scripts, and each member
   package contributes its own;
+- for a `package.json`, the tool that runs its scripts is detected from the
+  corepack `packageManager` field or a sibling lockfile, and the Commands
+  table uses the matching prefix (`yarn run test`, `pnpm run build`,
+  `bun run lint`) instead of always assuming `npm run`;
 - the same command string from different manifests (e.g. `npm run test` at
   the root and inside `packages/app`) is intentional and disambiguated by the
   Source column of the Commands table;
@@ -141,7 +145,7 @@ Every ecosystem detected by the scanner has a first-class adapter — nothing is
 | Manifest | Language | Commands | Dependencies |
 |---|---|---|---|
 | `go.mod` | Go | `go build ./...`, `go test ./...`, `go vet ./...`, `gofmt -l .` | Go modules |
-| `package.json` | JavaScript/TypeScript | npm scripts (`npm run build`, …) | npm packages |
+| `package.json` | JavaScript/TypeScript | npm/yarn/pnpm/bun scripts (`npm run build`, `yarn run test`, …) | npm packages |
 | `Cargo.toml` | Rust | `cargo build`, `cargo test`, `cargo run`, `cargo fmt --check`, `cargo clippy` | crates |
 | `pyproject.toml` | Python | `pytest`, `ruff check .` | Python packages |
 | `Makefile` | Generic (Make) | make targets | — |
