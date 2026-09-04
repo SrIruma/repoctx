@@ -4,7 +4,6 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/SrIruma/repoctx/ci.yml)](https://github.com/SrIruma/repoctx/actions)
 [![Release](https://img.shields.io/github/v/release/SrIruma/repoctx)](https://github.com/SrIruma/repoctx/releases)
 [![Downloads](https://img.shields.io/github/downloads/SrIruma/repoctx/total)](https://github.com/SrIruma/repoctx/releases)
-[![Go Report Card](https://goreportcard.com/badge/github.com/SrIruma/repoctx)](https://goreportcard.com/report/github.com/SrIruma/repoctx)
 [![License](https://img.shields.io/github/license/SrIruma/repoctx)](LICENSE)
 
 > **Status:** pre-1.0 (0.x), active development. The machine contract
