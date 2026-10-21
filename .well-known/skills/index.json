@@ -1,0 +1,9 @@
+{
+  "skills": [
+    {
+      "name": "repoctx",
+      "description": "Use when AGENTS.md, CLAUDE.md, .cursorrules or any agent context file must be checked against the real repository — regenerates the code-derived sections (commands, modules, dependencies) and detects rot (ghost commands, stale paths).",
+      "url": "https://raw.githubusercontent.com/SrIruma/repoctx/main/skills/repoctx/SKILL.md"
+    }
+  ]
+}

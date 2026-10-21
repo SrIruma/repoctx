@@ -24,6 +24,10 @@ jobs:
         run: |
           go run ./cmd/repoctx generate .
           git diff --exit-code AGENTS.md
+      - name: "Check SKILL.md is in sync with repoctx skill"
+        run: |
+          go run ./cmd/repoctx skill > /tmp/repoctx-skill.md
+          diff -u skills/repoctx/SKILL.md /tmp/repoctx-skill.md
       - run: go run ./cmd/repoctx audit . --check
 
   docs:
