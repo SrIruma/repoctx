@@ -5,7 +5,7 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [v0.7.0] - 2026-10-21
 
 ### Fixed
 
@@ -219,7 +219,8 @@ retracted so the contract stays open while the tool is validated in real use.
   meson) are detected and reported.
 - CI workflow (`go vet`, `go build`, `go test`) on push to `main` and PRs.
 
-[Unreleased]: https://github.com/SrIruma/repoctx/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/SrIruma/repoctx/compare/v0.7.0...HEAD
+[v0.7.0]: https://github.com/SrIruma/repoctx/compare/v0.6.0...v0.7.0
 [v0.5.0]: https://github.com/SrIruma/repoctx/compare/v0.4.0...v0.5.0
 [v0.4.0]: https://github.com/SrIruma/repoctx/compare/v0.3.0...v0.4.0
 [v0.3.0]: https://github.com/SrIruma/repoctx/compare/v0.2.0...v0.3.0
