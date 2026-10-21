@@ -1,12 +1,12 @@
 {
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Keep your AI coding-agent context files (AGENTS.md, CLAUDE.md) truthful.",
   "homepage": "https://github.com/SrIruma/repoctx",
   "license": "MIT",
   "architecture": {
     "64bit": {
-      "url": "https://github.com/SrIruma/repoctx/releases/download/v0.8.0/repoctx_windows_amd64.exe",
-      "hash": "214408e2dfc2b93afc8c36651747fb9566382fadd57a1f343a81a476f3739d34"
+      "url": "https://github.com/SrIruma/repoctx/releases/download/v0.9.0/repoctx_windows_amd64.exe",
+      "hash": "6722980e11883f9287dee480e1319a712ffb768a33f85f1f0705278cc845c508"
     }
   },
   "bin": [
