@@ -17,6 +17,7 @@ stage() {
     local npmname="$1" artifact="$2"
     local dir="npm/repoctx-${npmname}"
     local bin="repoctx"
+    mkdir -p "${dir}/bin"
     case "$npmname" in win32-*) bin="repoctx.exe" ;; esac
     if [ ! -f "dist/${artifact}" ]; then
         echo "missing dist/${artifact}" >&2
@@ -41,6 +42,7 @@ stage win32-arm64   repoctx_windows_arm64.exe
 stage win32-x64     repoctx_windows_amd64.exe
 
 # main package version
+mkdir -p npm/repoctx/bin
 python3 - npm/repoctx/package.json "$version" << 'PY'
 import json,sys
 p=sys.argv[1]; v=sys.argv[2]
