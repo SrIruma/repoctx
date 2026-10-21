@@ -30,7 +30,8 @@ func writeNestedProject(t *testing.T, dir string) {
 	write("other/package.json")
 }
 
-func writeToml(t *testing.T, path, content string) {
+// writeFile writes an arbitrary file, creating parent directories.
+func writeFile(t *testing.T, path, content string) {
 	t.Helper()
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		t.Fatal(err)
@@ -38,6 +39,20 @@ func writeToml(t *testing.T, path, content string) {
 	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
 		t.Fatal(err)
 	}
+}
+
+// writeToml writes a TOML config file.
+func writeToml(t *testing.T, path, content string) {
+	t.Helper()
+	writeFile(t, path, content)
+}
+
+// writeContext writes a context file whose marked section claims one command.
+func writeContext(t *testing.T, path, command string) {
+	t.Helper()
+	content := "# Context\n\n## Commands\n\n" + markdown.StartMarker +
+		"\n| `" + command + "` | `Makefile` |\n" + markdown.EndMarker + "\n"
+	writeFile(t, path, content)
 }
 
 func execCLI(t *testing.T, args ...string) (string, string, int) {
@@ -334,5 +349,68 @@ func TestConfigInvalidPathErrors(t *testing.T) {
 	}
 	if !strings.Contains(errOut, "config") {
 		t.Errorf("stderr should mention config:\n%s", errOut)
+	}
+}
+
+func TestAuditUsesConfigFiles(t *testing.T) {
+	dir := t.TempDir()
+	writeToml(t, filepath.Join(dir, "repoctx.toml"), "files = [\"CONTEXT.md\"]\n")
+	writeFile(t, filepath.Join(dir, "Makefile"), "test:\n\t@echo hi\n")
+	writeContext(t, filepath.Join(dir, "CONTEXT.md"), "make test")
+
+	out, errOut, code := execCLI(t, "audit", dir)
+	if code != 0 {
+		t.Fatalf("audit exit code = %d, stderr:\n%s", code, errOut)
+	}
+	if !strings.Contains(out, "CONTEXT.md") {
+		t.Errorf("audit should report the configured context file, output:\n%s", out)
+	}
+	if strings.Contains(out, "AGENTS.md") {
+		t.Errorf("audit should not report AGENTS.md when the config names another file:\n%s", out)
+	}
+}
+
+func TestAuditConfigFilesReplaceDefaults(t *testing.T) {
+	dir := t.TempDir()
+	writeToml(t, filepath.Join(dir, "repoctx.toml"), "files = [\"CONTEXT.md\"]\n")
+	writeFile(t, filepath.Join(dir, "Makefile"), "test:\n\t@echo hi\n")
+	writeContext(t, filepath.Join(dir, "CONTEXT.md"), "make test")
+	// AGENTS.md claims a command that does not exist. It is not in the
+	// configured list, so it must not be audited.
+	writeContext(t, filepath.Join(dir, "AGENTS.md"), "make nope")
+
+	_, errOut, code := execCLI(t, "audit", dir, "--check")
+	if code != 0 {
+		t.Errorf("AGENTS.md is not in the configured list and must not be audited; exit %d\n%s", code, errOut)
+	}
+}
+
+func TestAuditDefaultsToAgentsAndClaudeWhenUnconfigured(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "Makefile"), "test:\n\t@echo hi\n")
+	writeContext(t, filepath.Join(dir, "AGENTS.md"), "make test")
+	writeContext(t, filepath.Join(dir, "CLAUDE.md"), "make test")
+
+	out, errOut, code := execCLI(t, "audit", dir)
+	if code != 0 {
+		t.Fatalf("audit exit code = %d, stderr:\n%s", code, errOut)
+	}
+	for _, want := range []string{"AGENTS.md", "CLAUDE.md"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("audit should report %s by default, output:\n%s", want, out)
+		}
+	}
+}
+
+func TestAuditNoContextFilesMessageNamesConfiguredFiles(t *testing.T) {
+	dir := t.TempDir()
+	writeToml(t, filepath.Join(dir, "repoctx.toml"), "files = [\"CONTEXT.md\"]\n")
+
+	out, errOut, code := execCLI(t, "audit", dir)
+	if code != 0 {
+		t.Fatalf("audit exit code = %d, stderr:\n%s", code, errOut)
+	}
+	if !strings.Contains(out, "no context files (CONTEXT.md) found in") {
+		t.Errorf("message should name the configured files, output:\n%s", out)
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -72,7 +73,8 @@ func runAudit(cmd *cobra.Command, dir string, jsonOut, check bool, opts resolved
 	}
 
 	var reports []*audit.Report
-	for _, name := range contextFiles(abs) {
+	targets := auditTargets(opts)
+	for _, name := range contextFiles(abs, targets) {
 		r, err := audit.Run(audit.Options{
 			Root:   abs,
 			File:   filepath.Join(abs, name),
@@ -84,7 +86,8 @@ func runAudit(cmd *cobra.Command, dir string, jsonOut, check bool, opts resolved
 		reports = append(reports, r)
 	}
 	if len(reports) == 0 {
-		fmt.Fprintln(cmd.OutOrStdout(), "no context files (AGENTS.md, CLAUDE.md) found in", abs)
+		fmt.Fprintf(cmd.OutOrStdout(), "no context files (%s) found in %s\n",
+			strings.Join(targets, ", "), abs)
 		return nil
 	}
 	if jsonOut {
@@ -108,10 +111,24 @@ func runAudit(cmd *cobra.Command, dir string, jsonOut, check bool, opts resolved
 	return nil
 }
 
+// defaultContextFiles are the context files audited when the project does not
+// configure its own.
+var defaultContextFiles = []string{"AGENTS.md", "CLAUDE.md"}
+
+// auditTargets returns the context file names to audit. A project that lists
+// `files` in repoctx.toml is audited on exactly those; otherwise the built-in
+// defaults apply.
+func auditTargets(opts resolved) []string {
+	if opts.filesConfigured {
+		return opts.files
+	}
+	return defaultContextFiles
+}
+
 // contextFiles returns the known context files that exist in dir.
-func contextFiles(dir string) []string {
+func contextFiles(dir string, names []string) []string {
 	var out []string
-	for _, name := range []string{"AGENTS.md", "CLAUDE.md"} {
+	for _, name := range names {
 		if _, err := os.Stat(filepath.Join(dir, name)); err == nil {
 			out = append(out, name)
 		}

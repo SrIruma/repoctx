@@ -29,6 +29,10 @@ type resolved struct {
 	maxDepth int
 	skipDirs []string
 	files    []string
+	// filesConfigured reports whether the file list came from the config file
+	// or from an explicit flag rather than from the built-in default. Commands
+	// that have their own default list use it when this is false.
+	filesConfigured bool
 }
 
 // resolve loads repoctx.toml (or the --config override) for dir and merges it
@@ -65,6 +69,7 @@ func (f scanFlags) resolve(dir string) (resolved, error) {
 	if f.filesSet {
 		out.files = f.files
 	}
+	out.filesConfigured = len(out.files) > 0
 	if len(out.files) == 0 {
 		out.files = []string{"AGENTS.md"}
 	}
