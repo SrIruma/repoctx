@@ -36,6 +36,8 @@ jobs:
     name: Publish to npm
     runs-on: ubuntu-latest
     needs: release
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -49,13 +51,14 @@ jobs:
       - name: Build the release artifacts
         run: make release VERSION="${GITHUB_REF_NAME}"
       - name: Stage binaries into npm packages
-        if: ${{ secrets.NPM_TOKEN != '' }}
-        run: bash scripts/npm-stage.sh "${GITHUB_REF_NAME}"
+        run: |
+          if [ -z "$NPM_TOKEN" ]; then echo "NPM_TOKEN not set; skipping npm publish."; exit 0; fi
+          bash scripts/npm-stage.sh "${GITHUB_REF_NAME}"
       - name: Publish all packages
-        if: ${{ secrets.NPM_TOKEN != '' }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
+          if [ -z "$NPM_TOKEN" ]; then echo "NPM_TOKEN not set; skipping npm publish."; exit 0; fi
           for d in npm/repoctx npm/repoctx-*; do
             (cd "$d" && npm publish --access public)
           done
