@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- The `release` workflow publishes a GitHub release on every `v*` tag: it
+  cross-compiles every supported platform and attaches the binaries plus
+  `SHA256SUMS.txt`, so releases are reproducible instead of hand-assembled.
+  `windows/arm64` joins the target list; `linux/386` is dropped as obsolete.
 - `audit` accepts a repeatable `--file` flag to select which context files to
   audit. When set, it replaces both the `files` list from `repoctx.toml` and
   the `AGENTS.md` / `CLAUDE.md` defaults, mirroring `generate --file`, so a

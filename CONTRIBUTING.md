@@ -92,6 +92,15 @@ repoctx follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Releases use plain tags (`vX.Y.Z`) with the version injected at build time via
 `-ldflags` (see `make release VERSION=vX.Y.Z`).
 
+Cutting a release:
+
+1. Update `CHANGELOG.md` and merge it.
+2. Tag `main` and push the tag: `git tag vX.Y.Z && git push origin vX.Y.Z`.
+3. The `release` workflow (`.github/workflows/release.yml`) builds every
+   platform with `make release VERSION=$tag` and attaches the binaries plus
+   `SHA256SUMS.txt` to the GitHub release. Nothing else is published — the
+   GitHub release is the canonical distribution channel.
+
 While the project is on `0.x`, any release may break compatibility. The
 planned policy from `1.0.0` (when the machine contract is frozen) is:
 
