@@ -53,7 +53,7 @@ func Run(o Options) (*Report, error) {
 	text := string(content)
 	report := &Report{File: o.File}
 	report.Checks = append(report.Checks, checkCommands(text, o.Actual))
-	report.Checks = append(report.Checks, checkPaths(text, o.Root, o.Actual))
+	report.Checks = append(report.Checks, checkPaths(text, o.Root, filepath.Dir(o.File), o.Actual))
 	passed := 0
 	for _, c := range report.Checks {
 		if c.Passed {
@@ -136,7 +136,11 @@ func extensionOf(s string) string {
 // checkPaths flags repository paths mentioned anywhere in the context file
 // that no longer exist on disk. Paths are collected from backticks and
 // markdown links; commands and URLs are excluded to avoid false positives.
-func checkPaths(content string, root string, actual []project.Command) Check {
+// A path is resolved relative to the context file's own directory first (so a
+// nested AGENTS.md refers to its own subtree), then relative to the repository
+// root (so a file can still cite root-relative paths). It is stale only when
+// neither base resolves it.
+func checkPaths(content string, root, fileDir string, actual []project.Command) Check {
 	exclude := map[string]bool{}
 	for _, c := range actual {
 		exclude[c.Cmd] = true
@@ -147,7 +151,7 @@ func checkPaths(content string, root string, actual []project.Command) Check {
 		if exclude[cand] {
 			continue
 		}
-		if _, err := os.Stat(filepath.Join(root, cand)); err != nil {
+		if !pathExists(fileDir, cand) && !pathExists(root, cand) {
 			c.Passed = false
 			c.Issues = append(c.Issues, Issue{
 				Path:   cand,
@@ -159,6 +163,17 @@ func checkPaths(content string, root string, actual []project.Command) Check {
 		c.Detail = fmt.Sprintf("%d stale path(s)", len(c.Issues))
 	}
 	return c
+}
+
+// pathExists reports whether cand exists under base. Absolute candidates are
+// checked directly.
+func pathExists(base, cand string) bool {
+	p := cand
+	if !filepath.IsAbs(p) {
+		p = filepath.Join(base, cand)
+	}
+	_, err := os.Stat(p)
+	return err == nil
 }
 
 // candidatePaths extracts path-like references from a context file.
