@@ -5,6 +5,18 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- `audit` now honours the `files` list in `repoctx.toml`. It previously
+  hardcoded `AGENTS.md` and `CLAUDE.md`, so a project that named its context
+  file differently got a silent pass: `audit --check` reported "no context
+  files" and exited `0`, and a CI gate built on it never noticed the drift.
+  When `files` is configured, `audit` audits exactly those files; when it is
+  absent, the previous default of `AGENTS.md` and `CLAUDE.md` is unchanged.
+  The "no context files" message now names the files that were searched for.
+
 ## [v0.6.0] - 2026-08-15
 
 ### Added
@@ -207,7 +219,7 @@ retracted so the contract stays open while the tool is validated in real use.
   meson) are detected and reported.
 - CI workflow (`go vet`, `go build`, `go test`) on push to `main` and PRs.
 
-[Unreleased]: https://github.com/SrIruma/repoctx/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/SrIruma/repoctx/compare/v0.6.0...HEAD
 [v0.5.0]: https://github.com/SrIruma/repoctx/compare/v0.4.0...v0.5.0
 [v0.4.0]: https://github.com/SrIruma/repoctx/compare/v0.3.0...v0.4.0
 [v0.3.0]: https://github.com/SrIruma/repoctx/compare/v0.2.0...v0.3.0

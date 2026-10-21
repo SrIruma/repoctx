@@ -57,7 +57,7 @@ config file, then built-in defaults.
 # repoctx.toml
 max_depth = 4               # how deep the scanner descends
 skip_dirs = ["third_party"] # extra directories to skip (built-ins always apply)
-files = ["AGENTS.md", "CLAUDE.md"]  # default context files for generate
+files = ["AGENTS.md", "CLAUDE.md"]  # context files managed by generate and audited by audit
 ```
 
 - `--max-depth` and `--skip-dirs` on the command line win over the config
@@ -65,6 +65,9 @@ files = ["AGENTS.md", "CLAUDE.md"]  # default context files for generate
   always preserved.
 - `generate` uses `files` from the config when no `--file` is given
   (otherwise `AGENTS.md`).
+- `audit` audits `files` from the config when it is set, and `AGENTS.md` and
+  `CLAUDE.md` otherwise. A project that names its context file differently
+  therefore gets audited on that file too.
 - `--config <path>` reads the config from a specific location instead of
   `<dir>/repoctx.toml`.
 

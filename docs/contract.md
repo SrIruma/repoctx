@@ -116,9 +116,23 @@ return the code silently.
 | `score` | integer | `0`–`100`; `100` only when every check passed. |
 | `passed` | boolean | `true` exactly when `score == 100`. |
 
-When no `AGENTS.md` / `CLAUDE.md` exists, `audit --json` prints a human
-message on stdout (`no context files (AGENTS.md, CLAUDE.md) found in ...`)
-and exits `0` — no JSON is emitted.
+### Which files are audited
+
+`audit` audits `AGENTS.md` and `CLAUDE.md` by default. When the project
+configures `files` in `repoctx.toml`, it audits exactly those files instead:
+
+```toml
+# repoctx.toml
+files = ["CONTEXT.md"]
+```
+
+The default is unchanged when `files` is absent, so the set of audited files
+only differs for projects that configure it explicitly.
+
+When no audited context file exists, `audit --json` prints a human message on
+stdout (`no context files (AGENTS.md, CLAUDE.md) found in ...`) and exits `0` —
+no JSON is emitted. The message names the files that were looked for, so a
+configured project sees `no context files (CONTEXT.md) found in ...`.
 
 ## Stability policy
 
