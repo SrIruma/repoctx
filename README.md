@@ -36,6 +36,19 @@ go install github.com/SrIruma/repoctx/cmd/repoctx@latest
 npx @sriruma/repoctx --help
 ```
 
+Other channels:
+
+```sh
+# Homebrew
+brew tap SrIruma/tap && brew install repoctx
+
+# winget (Windows)
+winget install SrIruma.repoctx
+
+# scoop (Windows)
+scoop bucket add sriruma https://github.com/SrIruma/scoop-bucket && scoop install repoctx
+```
+
 Or build from source:
 
 ```sh

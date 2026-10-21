@@ -1,0 +1,12 @@
+PackageIdentifier: SrIruma.repoctx
+PackageVersion: 0.7.0
+InstallerLocale: en-US
+InstallerType: portable
+Commands:
+  - repoctx
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/SrIruma/repoctx/releases/download/v0.7.0/repoctx_windows_amd64.exe
+    InstallerSha256: 7d38cbdf4fa3d21edc8a9d28c6a541dfc400b09fc9052dd1e89c828ac294d867
+ManifestType: installer
+ManifestVersion: 1.6.0
