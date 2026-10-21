@@ -20,14 +20,18 @@ Type "bin/repoctx info tests/fixtures/scanner/mono"
 Enter
 Sleep 1400ms
 
-Type "bin/repoctx workflow"
+Type "bin/repoctx init tests/fixtures/scanner/mono --dry-run"
 Enter
-Sleep 1800ms
+Sleep 1400ms
 
-Type "bin/repoctx audit tests/fixtures/audit/healthy"
+Type "bin/repoctx skill | head -12"
 Enter
-Sleep 1800ms
+Sleep 1400ms
 
-Type "bin/repoctx audit tests/fixtures/audit/ghost --check; echo $?"
+Type "bin/repoctx audit tests/fixtures/scanner/nested-context tests/fixtures/audit/healthy"
+Enter
+Sleep 2000ms
+
+Type "bin/repoctx audit tests/fixtures/audit/ghost --check; echo exit=$?"
 Enter
 Sleep 3000ms

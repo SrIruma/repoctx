@@ -7,44 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.9.0] - 2026-10-21
+
 ### Added
 
-- `audit` accepts multiple roots (`repoctx audit <dir>...`) for fleet mode: per-repo reports plus a fleet score, `--json` gains `roots[]`/`reports[]`/`fleet_score`/`passed`, and exit code is `1` when any repo fails. A single root whose `repoctx.toml` lists `roots = [...]` expands automatically.
+- `audit` accepts multiple roots (`repoctx audit <dir>...`) for fleet mode: per-repo
+  reports plus a fleet score, `--json` gains `roots[]`/`reports[]`/`fleet_score`/
+  `passed`, and exit code is `1` when any repo fails. A single root whose
+  `repoctx.toml` lists `roots = [...]` expands automatically.
+- Canonical `SKILL.md` (from `repoctx skill`) published to in-repo agent channels:
+  `skills/repoctx/SKILL.md`, `.opencode/skills/`, `.agents/skills/`,
+  `.claude/skills/`, `.cursor/rules/repoctx.mdc`, and `.well-known/skills/index.json`.
+  README gains a "Using repoctx with agents" section; CI gains a SKILL.md drift gate.
+- `docs/metrics.md` defines Fase 2 metrics and kill criteria.
+- `docs/roadmap.md` is now public.
 
-- Distribution channels: Homebrew tap (`SrIruma/tap`), winget manifest and Scoop bucket (`SrIruma/scoop-bucket`) so repoctx installs with `brew install`, `winget install` and `scoop install`. Canonical copies live under `packaging/`.
+## [v0.8.0] - 2026-10-21
 
-- `@sriruma/repoctx` is now publishable to npm: a main package with a `bin` shim plus six platform packages (`optionalDependencies`, gated by `os`/`cpu`), so `npx @sriruma/repoctx` works without a Go toolchain. `scripts/npm-stage.sh` stages the release binaries into the platform packages; the release workflow publishes all seven packages when `NPM_TOKEN` is set.
+### Added
 
-- `scripts/install.sh` installs the prebuilt binary from a GitHub release
-  without a Go toolchain: it detects the platform, verifies the download
-  against the release's `SHA256SUMS.txt`, and fails closed on a mismatch.
-- The `release` workflow publishes a GitHub release on every `v*` tag: it
-  cross-compiles every supported platform and attaches the binaries plus
-  `SHA256SUMS.txt`, so releases are reproducible instead of hand-assembled.
-  `windows/arm64` joins the target list; `linux/386` is dropped as obsolete.
-- `audit` accepts a repeatable `--file` flag to select which context files to
-  audit. When set, it replaces both the `files` list from `repoctx.toml` and
-  the `AGENTS.md` / `CLAUDE.md` defaults, mirroring `generate --file`, so a
-  project can gate CI on a context file that lives outside the configured set.
-- Nested context files are discovered across the tree. `generate` (without
-  `--file` or a `files` config) and `audit` now find every `AGENTS.md` /
-  `CLAUDE.md` in the repository, so a monorepo keeps one context file per
-  package. `generate` writes each scope's commands and modules into the context
-  file that owns that subtree, with paths relative to it; the root file still
-  describes the whole tree. `info --json` surfaces the discovered files as
-  `context_files`. Discovery honours `--max-depth` and `--skip-dirs`.
-- Non-canonical manifests are excluded from the generated tables. Manifests
-  under `test`/`tests`/`fixtures`/`examples`/`vendor` and similar directories
-  (and context files below them) are still detected and reported — `info --json`
-  now carries `manifests[].canonical` — but no longer appear in the generated
-  command/module tables, so a project's own context file stops drowning in
-  fixture noise.
+- `repoctx init [dir] [--file X]` bootstraps a context file from scratch with
+  overview, structure, code-derived commands/modules tables, convention hint,
+  TODO markers and a maintenance workflow block (`--dry-run`, `--force`).
+- `repoctx skill [--format claude|cursor|agents|opencode]` emits the canonical
+  SKILL.md to stdout (deterministic).
+- Distribution channels: Homebrew tap (`SrIruma/tap`), winget manifest and Scoop
+  bucket (`SrIruma/scoop-bucket`), npm package `@sriruma/repoctx` (main + six
+  platform packages via `optionalDependencies`), and `scripts/install.sh`.
+- `.github/workflows/release.yml` publishes a GitHub release on every `v*` tag:
+  cross-compiles all platforms and attaches binaries plus `SHA256SUMS.txt`.
+  `windows/arm64` added; `linux/386` dropped.
+- `scripts/preflight.sh` mirrors all CI gates locally.
+- `audit` accepts a repeatable `--file` flag.
+- Nested context files discovered across the tree; `generate` writes per-scope.
+- Non-canonical manifests excluded from generated tables.
+- `scripts/npm-stage.sh` stages release binaries into npm platform packages.
 
 ### Fixed
 
-- Path references in a nested context file are resolved relative to that file's
-  directory first (then the repository root), so a `backend/AGENTS.md` citing
-  its own `go.mod` is no longer reported as a stale path.
+- Path references in a nested context file resolve relative to that file's
+  directory first.
+- `--version` reports correctly when installed via `go install`.
 
 ## [v0.7.0] - 2026-10-21
 
