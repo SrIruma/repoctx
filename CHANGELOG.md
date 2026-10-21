@@ -13,6 +13,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   audit. When set, it replaces both the `files` list from `repoctx.toml` and
   the `AGENTS.md` / `CLAUDE.md` defaults, mirroring `generate --file`, so a
   project can gate CI on a context file that lives outside the configured set.
+- Nested context files are discovered across the tree. `generate` (without
+  `--file` or a `files` config) and `audit` now find every `AGENTS.md` /
+  `CLAUDE.md` in the repository, so a monorepo keeps one context file per
+  package. `generate` writes each scope's commands and modules into the context
+  file that owns that subtree, with paths relative to it; the root file still
+  describes the whole tree. `info --json` surfaces the discovered files as
+  `context_files`. Discovery honours `--max-depth` and `--skip-dirs`.
+- Non-canonical manifests are excluded from the generated tables. Manifests
+  under `test`/`tests`/`fixtures`/`examples`/`vendor` and similar directories
+  (and context files below them) are still detected and reported — `info --json`
+  now carries `manifests[].canonical` — but no longer appear in the generated
+  command/module tables, so a project's own context file stops drowning in
+  fixture noise.
+
+### Fixed
+
+- Path references in a nested context file are resolved relative to that file's
+  directory first (then the repository root), so a `backend/AGENTS.md` citing
+  its own `go.mod` is no longer reported as a stale path.
 
 ## [v0.7.0] - 2026-10-21
 

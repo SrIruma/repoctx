@@ -50,7 +50,12 @@ var manifestKinds = map[string]ManifestKind{
 	"meson.build":      KindMeson,
 }
 
-// Scanner walks a repository tree looking for project manifests.
+// DefaultContextNames are the agent context files looked for in every
+// directory.
+var DefaultContextNames = []string{"AGENTS.md", "CLAUDE.md"}
+
+// Scanner walks a repository tree looking for project manifests and agent
+// context files.
 type Scanner struct {
 	Root     string
 	MaxDepth int
@@ -74,6 +79,10 @@ func (s *Scanner) Scan() (*Project, error) {
 	maxDepth := s.MaxDepth
 	if maxDepth <= 0 {
 		maxDepth = 6
+	}
+	contextSet := make(map[string]bool, len(DefaultContextNames))
+	for _, n := range DefaultContextNames {
+		contextSet[n] = true
 	}
 
 	err := filepath.WalkDir(s.Root, func(path string, d fs.DirEntry, err error) error {
@@ -108,15 +117,20 @@ func (s *Scanner) Scan() (*Project, error) {
 			return nil
 		}
 		if kind, ok := manifestKinds[name]; ok {
+			relSlash := filepath.ToSlash(rel)
 			p.Manifests = append(p.Manifests, &Manifest{
-				Path:  filepath.ToSlash(rel),
-				Kind:  kind,
-				Scope: ScopeOf(filepath.ToSlash(rel)),
+				Path:      relSlash,
+				Kind:      kind,
+				Scope:     ScopeOf(relSlash),
+				Canonical: IsCanonical(relSlash),
 			})
 			return nil
 		}
 		if desc, ok := knownOtherManifests[name]; ok {
 			p.DetectedOther = append(p.DetectedOther, desc+" ("+filepath.ToSlash(rel)+")")
+		}
+		if contextSet[name] && IsCanonical(filepath.ToSlash(rel)) {
+			p.ContextFiles = append(p.ContextFiles, filepath.ToSlash(rel))
 		}
 		return nil
 	})
@@ -126,5 +140,6 @@ func (s *Scanner) Scan() (*Project, error) {
 
 	sort.Slice(p.Manifests, func(i, j int) bool { return p.Manifests[i].Path < p.Manifests[j].Path })
 	sort.Strings(p.DetectedOther)
+	sort.Strings(p.ContextFiles)
 	return p, nil
 }

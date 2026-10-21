@@ -26,7 +26,8 @@
       ],
       "deps": [
         "github.com/spf13/cobra"
-      ]
+      ],
+      "canonical": true
     },
     {
       "path": "package.json",
@@ -43,6 +44,7 @@
           "cmd": "npm run test"
         }
       ],
+      "canonical": true,
       "package_manager": "npm"
     },
     {
@@ -71,7 +73,8 @@
           "name": "clippy",
           "cmd": "cargo clippy"
         }
-      ]
+      ],
+      "canonical": true
     }
   ]
 }

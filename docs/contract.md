@@ -81,11 +81,28 @@ return the code silently.
 | `manifests[].kind` | string | `npm`, `cargo`, `go`, `pyproject`, `make`, `cmake`, `gemfile`, `composer`, `maven`, `gradle`, `meson`. |
 | `manifests[].language` | string | Display name; empty when extraction failed. |
 | `manifests[].scope` | string | Directory of the manifest (`"."` at the root). |
+| `manifests[].canonical` | boolean | `false` when the manifest lives under a test/fixture/example/vendor directory (see [Canonical scoping](#canonical-scoping)); such manifests are reported but excluded from the generated tables. |
 | `manifests[].commands` | array | `{name, cmd}` pairs; `null` when extraction failed. |
 | `manifests[].package_manager` | string | npm-kind only: `npm`, `yarn`, `pnpm` or `bun` — the tool that runs the package.json scripts. Detected from the corepack `packageManager` field, then from a sibling lockfile (`yarn.lock`, `pnpm-lock.yaml`, `bun.lock`, `bun.lockb`, `package-lock.json`, `npm-shrinkwrap.json`); `npm` when there is no signal. Commands use the matching prefix (`yarn run build`, `pnpm run test`, `bun run lint`). |
 | `manifests[].deps` | array | Omitted when empty. |
 | `manifests[].errors` | array | Extraction failures; present only when the manifest could not be parsed. |
+| `context_files` | array | Context files discovered in the tree, relative to `root`, sorted; omitted when none. See [Which files are audited](#which-files-are-audited). |
 | `detected_other` | array | Reserved for detected-but-unsupported manifests; currently never emitted. |
+
+## Canonical scoping
+
+A repository often contains manifests that are not part of its real surface:
+test fixtures, examples, vendored dependencies. repoctx detects them but marks
+them `"canonical": false` when any directory segment of the path is a
+recognised non-canonical name (`test`, `tests`, `testdata`, `fixture`,
+`fixtures`, `example`, `examples`, `vendor`, `third_party`, `node_modules`,
+`__tests__`, `e2e`, `spec`, `specs`).
+
+Non-canonical manifests stay in `info --json` (so nothing is hidden), but they
+are excluded from the generated command and module tables, and context files
+below non-canonical directories are not discovered. This keeps a repository
+like repoctx — which ships dozens of fixture manifests — from drowning its own
+context file in fixture noise.
 
 ## `audit --json` schema
 
@@ -119,16 +136,30 @@ return the code silently.
 
 ### Which files are audited
 
-`audit` audits `AGENTS.md` and `CLAUDE.md` by default. When the project
-configures `files` in `repoctx.toml`, it audits exactly those files instead:
+`audit` and `generate` choose their context files with the same precedence:
+
+1. an explicit `--file` flag (or the `files` list in `repoctx.toml`) wins
+   outright: exactly those names are used and the tree is not searched;
+2. otherwise the context files discovered in the tree are used, so a monorepo
+   keeps one context file per package (a nested `AGENTS.md` owns its own
+   subtree, with tables written relative to it);
+3. when discovery finds nothing, `audit` falls back to `AGENTS.md` and
+   `CLAUDE.md`, and `generate` falls back to creating `AGENTS.md`.
+
+A project can name its context files explicitly:
 
 ```toml
 # repoctx.toml
 files = ["CONTEXT.md"]
 ```
 
-The default is unchanged when `files` is absent, so the set of audited files
-only differs for projects that configure it explicitly.
+With `files` set, discovery is disabled and exactly those files are used, so
+the set of audited files only differs for projects that configure it.
+
+Path references inside a context file are resolved relative to the file's own
+directory first, then relative to the repository root. A nested `AGENTS.md` can
+therefore cite `go.mod` (its sibling) or `internal/cli/audit.go` (root-relative)
+and both resolve correctly.
 
 When no audited context file exists, `audit --json` prints a human message on
 stdout (`no context files (AGENTS.md, CLAUDE.md) found in ...`) and exits `0` —

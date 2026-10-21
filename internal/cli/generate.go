@@ -61,12 +61,13 @@ func runGenerate(cmd *cobra.Command, dir string, files []string, opts resolved, 
 	if err != nil {
 		return err
 	}
-	rendered := markdown.RenderSection(tableRows(p), moduleRows(p))
-	for _, f := range files {
+	targets := contextTargets(p, opts, files)
+	for _, f := range targets {
 		path := f
 		if !filepath.IsAbs(path) {
 			path = filepath.Join(abs, f)
 		}
+		rendered := markdown.RenderSection(tableRows(p, scopeOf(f)), moduleRows(p, scopeOf(f)))
 		out, changed, err := planFile(path, rendered)
 		if err != nil {
 			return fmt.Errorf("%s: %w", f, err)
@@ -85,6 +86,17 @@ func runGenerate(cmd *cobra.Command, dir string, files []string, opts resolved, 
 		fmt.Fprintf(cmd.OutOrStdout(), "generated %s\n", f)
 	}
 	return nil
+}
+
+// scopeOf returns the directory a context file owns. A context file at
+// docs/AGENTS.md owns the "docs" subtree; a file at the repository root owns
+// everything and is represented by ".".
+func scopeOf(file string) string {
+	dir := filepath.ToSlash(filepath.Dir(file))
+	if dir == "." || dir == "" {
+		return "."
+	}
+	return dir
 }
 
 // planFile computes the content path would get after a generation and whether
@@ -107,27 +119,57 @@ func planFile(path, rendered string) (out string, changed bool, err error) {
 	return out, out != string(data), nil
 }
 
-// tableRows flattens every manifest's commands into renderable rows, in the
-// deterministic manifest-then-command order produced by the scanner.
-func tableRows(p *project.Project) []markdown.Row {
+// tableRows flattens every manifest in scope into renderable rows, in the
+// deterministic manifest-then-command order produced by the scanner. Paths are
+// relative to scope so a nested context file describes its own subtree.
+func tableRows(p *project.Project, scope string) []markdown.Row {
 	var rows []markdown.Row
 	for _, m := range p.Manifests {
+		if !m.Canonical || !inScope(m.Scope, scope) {
+			continue
+		}
 		for _, c := range m.Commands {
-			rows = append(rows, markdown.Row{Command: c.Cmd, Source: m.Path})
+			rows = append(rows, markdown.Row{Command: c.Cmd, Source: relToScope(m.Path, scope)})
 		}
 	}
 	return rows
 }
 
-// moduleRows flattens every manifest into a renderable modules table row.
-func moduleRows(p *project.Project) []markdown.ModuleRow {
+// moduleRows flattens every manifest in scope into a renderable modules table
+// row, with paths relative to scope.
+func moduleRows(p *project.Project, scope string) []markdown.ModuleRow {
 	var rows []markdown.ModuleRow
 	for _, m := range p.Manifests {
+		if !m.Canonical || !inScope(m.Scope, scope) {
+			continue
+		}
 		rows = append(rows, markdown.ModuleRow{
-			Path:     m.Path,
+			Path:     relToScope(m.Path, scope),
 			Language: m.Language,
 			Deps:     strings.Join(m.Deps, ", "),
 		})
 	}
 	return rows
+}
+
+// inScope reports whether a manifest located in manifestScope belongs to the
+// subtree owned by scope. The root scope (".") owns everything.
+func inScope(manifestScope, scope string) bool {
+	if scope == "." {
+		return true
+	}
+	return manifestScope == scope || strings.HasPrefix(manifestScope, scope+"/")
+}
+
+// relToScope rewrites a manifest path to be relative to scope. The root scope
+// keeps the path unchanged.
+func relToScope(path, scope string) string {
+	if scope == "." {
+		return path
+	}
+	rel, err := filepath.Rel(scope, path)
+	if err != nil {
+		return path
+	}
+	return filepath.ToSlash(rel)
 }

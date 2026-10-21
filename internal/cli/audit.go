@@ -74,11 +74,14 @@ func runAudit(cmd *cobra.Command, dir string, jsonOut, check bool, opts resolved
 	}
 	var actual []project.Command
 	for _, m := range p.Manifests {
+		if !m.Canonical {
+			continue
+		}
 		actual = append(actual, m.Commands...)
 	}
 
 	var reports []*audit.Report
-	targets := auditTargets(opts)
+	targets := contextTargets(p, opts, defaultContextFiles)
 	for _, name := range contextFiles(abs, targets) {
 		r, err := audit.Run(audit.Options{
 			Root:   abs,
@@ -117,18 +120,8 @@ func runAudit(cmd *cobra.Command, dir string, jsonOut, check bool, opts resolved
 }
 
 // defaultContextFiles are the context files audited when the project does not
-// configure its own.
+// configure its own and the scan discovers none.
 var defaultContextFiles = []string{"AGENTS.md", "CLAUDE.md"}
-
-// auditTargets returns the context file names to audit. A project that lists
-// `files` in repoctx.toml is audited on exactly those; otherwise the built-in
-// defaults apply.
-func auditTargets(opts resolved) []string {
-	if opts.filesConfigured {
-		return opts.files
-	}
-	return defaultContextFiles
-}
 
 // contextFiles returns the known context files that exist in dir.
 func contextFiles(dir string, names []string) []string {

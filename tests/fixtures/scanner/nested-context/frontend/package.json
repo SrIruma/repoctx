@@ -1,0 +1,8 @@
+{
+  "name": "nested-context-frontend",
+  "scripts": {
+    "build": "echo frontend build",
+    "lint": "echo frontend lint",
+    "test": "echo frontend test"
+  }
+}
