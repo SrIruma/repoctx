@@ -86,6 +86,10 @@ go test ./...
 - [ ] README and CHANGELOG updated when user-facing behaviour changes.
 - [ ] Description explains the what and the why of the change.
 
+## Pre-flight
+
+Run `bash scripts/preflight.sh` to reproduce every CI gate locally before pushing.
+
 ## Versioning
 
 repoctx follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
