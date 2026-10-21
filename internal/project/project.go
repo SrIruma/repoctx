@@ -33,6 +33,10 @@ type Manifest struct {
 	Scope    string       `json:"scope"`
 	Commands []Command    `json:"commands"`
 	Deps     []string     `json:"deps,omitempty"`
+	// Canonical is false when the manifest lives under a test/fixture/example/
+	// vendor directory. Such manifests are detected and reported but excluded
+	// from the generated command and module tables.
+	Canonical bool `json:"canonical"`
 	// PackageManager names the tool that runs a package.json's scripts
 	// (npm, yarn, pnpm or bun); only set for npm-kind manifests.
 	PackageManager string `json:"package_manager,omitempty"`
@@ -46,6 +50,10 @@ type Project struct {
 	Root          string      `json:"root"`
 	Manifests     []*Manifest `json:"manifests"`
 	DetectedOther []string    `json:"detected_other,omitempty"`
+	// ContextFiles are the agent context files found in the tree, relative to
+	// Root with POSIX separators, sorted. Each is owned by the directory it
+	// lives in (its scope).
+	ContextFiles []string `json:"context_files,omitempty"`
 }
 
 // ScopeOf returns the scope directory for a manifest path (dir of the file).
