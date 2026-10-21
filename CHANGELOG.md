@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `scripts/install.sh` installs the prebuilt binary from a GitHub release
+  without a Go toolchain: it detects the platform, verifies the download
+  against the release's `SHA256SUMS.txt`, and fails closed on a mismatch.
 - The `release` workflow publishes a GitHub release on every `v*` tag: it
   cross-compiles every supported platform and attaches the binaries plus
   `SHA256SUMS.txt`, so releases are reproducible instead of hand-assembled.
