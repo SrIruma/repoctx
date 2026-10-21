@@ -1,0 +1,3 @@
+# repoctx configuration for this repository.
+# Packaging metadata under npm/ is not part of the motor's source tree.
+skip_dirs = ["npm"]

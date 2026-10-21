@@ -1,0 +1,23 @@
+{
+  "name": "@sriruma/repoctx-linux-arm64",
+  "version": "0.7.0",
+  "description": "repoctx prebuilt binary for linux/arm64.",
+  "license": "MIT",
+  "author": "SrIruma",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SrIruma/repoctx.git"
+  },
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "arm64"
+  ],
+  "files": [
+    "bin"
+  ],
+  "bin": {
+    "repoctx": "bin/repoctx"
+  }
+}

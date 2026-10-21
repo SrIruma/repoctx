@@ -29,10 +29,11 @@ curl -fsSL https://raw.githubusercontent.com/SrIruma/repoctx/main/scripts/instal
 ```
 
 Pass `--version vX.Y.Z` to pin a release or `--bindir DIR` to change the
-target. Or install with Go:
+target. Or install with Go or npm:
 
 ```sh
 go install github.com/SrIruma/repoctx/cmd/repoctx@latest
+npx @sriruma/repoctx --help
 ```
 
 Or build from source:
