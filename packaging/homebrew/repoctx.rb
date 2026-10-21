@@ -1,26 +1,26 @@
 class Repoctx < Formula
   desc "Keep your AI coding-agent context files (AGENTS.md, CLAUDE.md) truthful"
   homepage "https://github.com/SrIruma/repoctx"
-  version "0.7.0"
+  version "0.8.0"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/SrIruma/repoctx/releases/download/v0.7.0/repoctx_darwin_arm64"
-      sha256 "b36bebdb35a36604e85e897ddddfb541da4ec751c06e75edfb4538b7e437e89b"
+      url "https://github.com/SrIruma/repoctx/releases/download/v0.8.0/repoctx_darwin_arm64"
+      sha256 "6101ebca9a70005a5eab44141c6654f4427ec9ed1465ea24092d17c0225247ea"
     else
-      url "https://github.com/SrIruma/repoctx/releases/download/v0.7.0/repoctx_darwin_amd64"
-      sha256 "9b931983e4e0b9589c646583dc9407257b367ee8d59d6c0922445806f18ce27c"
+      url "https://github.com/SrIruma/repoctx/releases/download/v0.8.0/repoctx_darwin_amd64"
+      sha256 "798530de57b90bd847deaadbde22795c83569b1cd6bfc832698f88564130a4c3"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
-      url "https://github.com/SrIruma/repoctx/releases/download/v0.7.0/repoctx_linux_arm64"
-      sha256 "8155520de2b1a95ca957088a75cc532174053449ad8fe64c76942adafdc55e02"
+      url "https://github.com/SrIruma/repoctx/releases/download/v0.8.0/repoctx_linux_arm64"
+      sha256 "e2b64cdc6d66ee406a436a3623229dd511e3ed4ac97fd8f5f783654eff0f711b"
     else
-      url "https://github.com/SrIruma/repoctx/releases/download/v0.7.0/repoctx_linux_amd64"
-      sha256 "0b7f2d0ff066b759d2c4c85cf7f8bec6b101326b7f9757cebc02299f657e3637"
+      url "https://github.com/SrIruma/repoctx/releases/download/v0.8.0/repoctx_linux_amd64"
+      sha256 "51d22c6ba0309b0e3b21a453468632616e809d598bfa68dac4a7c0216550a597"
     end
   end
 
