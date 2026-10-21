@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"runtime/debug"
 
 	"github.com/spf13/cobra"
 )
@@ -17,7 +18,33 @@ func (e *exitError) Error() string { return fmt.Sprintf("exit code %d", e.code) 
 
 // version is overridden at build time via -ldflags
 // (-X github.com/SrIruma/repoctx/internal/cli.version=...).
-var version = "0.0.1"
+// It is empty by default, which means no ldflags were applied: the version
+// is then read from the build information the Go toolchain embeds in the
+// binary, so that `go install module@version` reports the version it was
+// installed from.
+var version = ""
+
+// resolveVersion picks the version to report. The ldflags-injected value
+// wins when present. Otherwise the module version recorded in the build
+// information is used, which `go install module@version` populates. A binary
+// built from a checkout has no usable version and reports "dev".
+func resolveVersion(injected string, info *debug.BuildInfo) string {
+	if injected != "" {
+		return injected
+	}
+	if info != nil {
+		if v := info.Main.Version; v != "" && v != "(devel)" {
+			return v
+		}
+	}
+	return "dev"
+}
+
+// buildVersion returns the version of the running binary.
+func buildVersion() string {
+	info, _ := debug.ReadBuildInfo()
+	return resolveVersion(version, info)
+}
 
 func NewRootCmd() *cobra.Command {
 	root := &cobra.Command{
@@ -26,7 +53,7 @@ func NewRootCmd() *cobra.Command {
 		Long: "repoctx scans a repository, extracts facts from the real code\n" +
 			"(build/test commands, module structure, dependencies) and keeps\n" +
 			"AGENTS.md / CLAUDE.md context files accurate.",
-		Version:       version,
+		Version:       buildVersion(),
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
