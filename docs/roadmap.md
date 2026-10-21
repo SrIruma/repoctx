@@ -1,6 +1,6 @@
 # Roadmap
 
-Estado actual: **v0.8.0** (Fase 1 cerrada). Contrato en 0.x, no congelado.
+Estado actual: **v0.9.0** (Fase 2 cerrada). Contrato en 0.x, no congelado.
 
 ## Completado — Fase 1 · v0.8.0 "bootstrap"
 
@@ -8,13 +8,13 @@ Estado actual: **v0.8.0** (Fase 1 cerrada). Contrato en 0.x, no congelado.
 - [x] `repoctx skill` — SKILL.md canónico generado
 - [x] `docs/roadmap.md` público
 
-## En curso — Fase 2 · v0.9.0 "fleet + skill gratis"
+## Completado — Fase 2 · v0.9.0 "fleet + skill gratis"
 
-- [ ] `repoctx audit` multi-repo
-- [ ] `fleet.toml` / roots en config
-- [ ] `audit --json` con `roots[]` + `reports[]`
-- [ ] SKILL.md canónico publicado en 8+ canales
-- [ ] Instrumentación de métricas
+- [x] `repoctx audit` multi-repo
+- [x] `fleet.toml` / roots en config
+- [x] `audit --json` con `roots[]` + `reports[]`
+- [x] SKILL.md canónico publicado en 8+ canales (in-repo)
+- [x] Instrumentación de métricas (docs/metrics.md)
 
 ## Después
 
