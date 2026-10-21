@@ -45,6 +45,7 @@ return the code silently.
 | `--json` | `info`, `audit` | Machine-readable output on stdout. |
 | `--check` | `audit` | Exit `1` when any file fails (CI gating). |
 | `--file` | `generate` | Context file(s) to update; repeatable. |
+| `--file` | `audit` | Context file(s) to audit; repeatable. When set, replaces `files` from `repoctx.toml` and the defaults (`AGENTS.md`, `CLAUDE.md`). |
 | `--dry-run` | `generate` | Preview changes without writing; exit `0`. |
 | `--config` | `info`, `generate`, `audit` | Explicit path to `repoctx.toml`. |
 | `--max-depth` | `info`, `generate`, `audit` | Scan depth limit (default `6`); must be positive. |

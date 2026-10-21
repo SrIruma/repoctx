@@ -414,3 +414,78 @@ func TestAuditNoContextFilesMessageNamesConfiguredFiles(t *testing.T) {
 		t.Errorf("message should name the configured files, output:\n%s", out)
 	}
 }
+
+func TestAuditFileFlagSelectsContextFile(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "Makefile"), "test:\n\t@echo hi\n")
+	// AGENTS.md claims a ghost command, but it is not named by --file.
+	writeContext(t, filepath.Join(dir, "AGENTS.md"), "make nope")
+	writeContext(t, filepath.Join(dir, "CONTEXT.md"), "make test")
+
+	out, errOut, code := execCLI(t, "audit", dir, "--file", "CONTEXT.md")
+	if code != 0 {
+		t.Fatalf("audit exit code = %d, stderr:\n%s", code, errOut)
+	}
+	if !strings.Contains(out, "CONTEXT.md") {
+		t.Errorf("audit should report the file named by --file, output:\n%s", out)
+	}
+	if strings.Contains(out, "AGENTS.md") {
+		t.Errorf("audit should ignore files not named by --file, output:\n%s", out)
+	}
+}
+
+func TestAuditFileFlagRepeatable(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "Makefile"), "test:\n\t@echo hi\n")
+	writeContext(t, filepath.Join(dir, "AGENTS.md"), "make test")
+	writeContext(t, filepath.Join(dir, "CLAUDE.md"), "make test")
+	// CONTEXT.md is not named, so it must not be audited (it would fail).
+	writeContext(t, filepath.Join(dir, "CONTEXT.md"), "make nope")
+
+	out, errOut, code := execCLI(t, "audit", dir, "--file", "AGENTS.md", "--file", "CLAUDE.md")
+	if code != 0 {
+		t.Fatalf("audit exit code = %d, stderr:\n%s", code, errOut)
+	}
+	for _, want := range []string{"AGENTS.md", "CLAUDE.md"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("audit should report %s named by --file, output:\n%s", want, out)
+		}
+	}
+	if strings.Contains(out, "CONTEXT.md") {
+		t.Errorf("audit should ignore CONTEXT.md not named by --file, output:\n%s", out)
+	}
+}
+
+func TestAuditFileFlagBeatsConfigFiles(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "Makefile"), "test:\n\t@echo hi\n")
+	writeToml(t, filepath.Join(dir, "repoctx.toml"), "files = [\"CONTEXT.md\"]\n")
+	// CONTEXT.md is in the config but would fail; AGENTS.md is named by the flag.
+	writeContext(t, filepath.Join(dir, "CONTEXT.md"), "make nope")
+	writeContext(t, filepath.Join(dir, "AGENTS.md"), "make test")
+
+	out, errOut, code := execCLI(t, "audit", dir, "--file", "AGENTS.md", "--check")
+	if code != 0 {
+		t.Fatalf("--file should override config and pass; exit %d\n%s\n%s", code, out, errOut)
+	}
+	if !strings.Contains(out, "AGENTS.md") {
+		t.Errorf("audit should report the file named by --file, output:\n%s", out)
+	}
+	if strings.Contains(out, "CONTEXT.md") {
+		t.Errorf("--file should replace the configured files, output:\n%s", out)
+	}
+}
+
+func TestAuditFileFlagSelectsNestedPath(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "Makefile"), "test:\n\t@echo hi\n")
+	writeContext(t, filepath.Join(dir, "docs", "AGENTS.md"), "make test")
+
+	out, errOut, code := execCLI(t, "audit", dir, "--file", filepath.Join("docs", "AGENTS.md"))
+	if code != 0 {
+		t.Fatalf("audit exit code = %d, stderr:\n%s", code, errOut)
+	}
+	if !strings.Contains(out, "AGENTS.md") {
+		t.Errorf("audit should report the nested file named by --file, output:\n%s", out)
+	}
+}

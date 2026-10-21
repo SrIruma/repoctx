@@ -38,7 +38,7 @@ make install # -> $GOBIN/repoctx
 |---|---|
 | `repoctx info [dir]` | Detect manifests and extract facts from a repository. Manifests that fail to parse are kept in the report with a `!` warning (and an `errors` field in `--json`). |
 | `repoctx generate [dir]` | Regenerate the code-derived sections of a context file (`AGENTS.md` by default, or the `files` from `repoctx.toml` / `--file`) between repoctx markers. `--dry-run` previews what would change without writing. |
-| `repoctx audit [dir]` | Detect context rot: stale paths and ghost commands, with a health score. `--check` exits non-zero on failure for CI gating. |
+| `repoctx audit [dir]` | Detect context rot: stale paths and ghost commands, with a health score. `--check` exits non-zero on failure for CI gating. Use `--file` to override. |
 | `repoctx workflow [file ...]` | Print a paste-ready block telling agents how to keep the context file truthful. |
 
 Run `repoctx <command> --help` for full usage. `info`, `generate` and `audit`
@@ -66,8 +66,9 @@ files = ["AGENTS.md", "CLAUDE.md"]  # context files managed by generate and audi
 - `generate` uses `files` from the config when no `--file` is given
   (otherwise `AGENTS.md`).
 - `audit` audits `files` from the config when it is set, and `AGENTS.md` and
-  `CLAUDE.md` otherwise. A project that names its context file differently
-  therefore gets audited on that file too.
+  `CLAUDE.md` otherwise. The flag `--file` (repeatable) replaces config and
+  defaults for both `generate` and `audit`. A project that names its context
+  file differently therefore gets audited on that file too.
 - `--config <path>` reads the config from a specific location instead of
   `<dir>/repoctx.toml`.
 

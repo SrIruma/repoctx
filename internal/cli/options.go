@@ -65,6 +65,9 @@ func (f scanFlags) resolve(dir string) (resolved, error) {
 		out.skipDirs = f.skipDirs
 	}
 
+	// Default to AGENTS.md only when the file list comes from defaults.
+	// When the list came from config or from an explicit --file flag,
+	// filesConfigured is true and commands (e.g. audit) use the list as-is.
 	out.files = cfg.Files
 	if f.filesSet {
 		out.files = f.files
