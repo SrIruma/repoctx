@@ -35,6 +35,10 @@ echo "== docs-examples drift =="
 make docs-examples >/dev/null
 git diff --exit-code docs/examples.md
 
+echo "== skill drift =="
+./bin/repoctx skill > /tmp/repoctx-skill.md
+diff -q /tmp/repoctx-skill.md skills/repoctx/SKILL.md
+
 echo "== corpus =="
 bash scripts/corpus.sh --fail
 
