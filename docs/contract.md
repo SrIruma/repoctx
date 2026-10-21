@@ -55,6 +55,27 @@ return the code silently.
 
 `--json` output is indented JSON (two spaces) written to stdout.
 
+## Fleet mode (multi-root audit)
+
+`audit` accepts one or more roots: `repoctx audit <dir>...`. With a single root
+the output shape is unchanged (array of per-file reports). With two or more
+roots the JSON shape becomes:
+
+```json
+{
+  "roots": ["<repo-a>", "<repo-b>"],
+  "reports": [
+    { "root": "<repo-a>", "files": [ { "file": ..., "checks": ..., "score": ..., "passed": ... } ] }
+  ],
+  "fleet_score": 100,
+  "passed": true
+}
+```
+
+A single root whose `repoctx.toml` contains a `roots = [...]` list expands to
+fleet mode automatically (paths resolved relative to the config file). Exit code
+is `1` when any file in any root fails (`--check`).
+
 `init` writes the skeleton to the target file (or stdout with `--dry-run`). `skill` writes the canonical `SKILL.md` to stdout; its output is stable and deterministic.
 
 ## `info --json` schema

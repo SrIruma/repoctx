@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `audit` accepts multiple roots (`repoctx audit <dir>...`) for fleet mode: per-repo reports plus a fleet score, `--json` gains `roots[]`/`reports[]`/`fleet_score`/`passed`, and exit code is `1` when any repo fails. A single root whose `repoctx.toml` lists `roots = [...]` expands automatically.
+
 - Distribution channels: Homebrew tap (`SrIruma/tap`), winget manifest and Scoop bucket (`SrIruma/scoop-bucket`) so repoctx installs with `brew install`, `winget install` and `scoop install`. Canonical copies live under `packaging/`.
 
 - `@sriruma/repoctx` is now publishable to npm: a main package with a `bin` shim plus six platform packages (`optionalDependencies`, gated by `os`/`cpu`), so `npx @sriruma/repoctx` works without a Go toolchain. `scripts/npm-stage.sh` stages the release binaries into the platform packages; the release workflow publishes all seven packages when `NPM_TOKEN` is set.
