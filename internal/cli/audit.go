@@ -23,6 +23,7 @@ const (
 
 func newAuditCmd() *cobra.Command {
 	var jsonOut, check bool
+	var files []string
 	var opts scanFlags
 	cmd := &cobra.Command{
 		Use:   "audit [dir]",
@@ -42,8 +43,10 @@ func newAuditCmd() *cobra.Command {
 				maxDepth:    opts.maxDepth,
 				skipDirs:    opts.skipDirs,
 				configPath:  opts.configPath,
+				files:       files,
 				maxDepthSet: cmd.Flags().Changed("max-depth"),
 				skipDirsSet: cmd.Flags().Changed("skip-dirs"),
+				filesSet:    cmd.Flags().Changed("file"),
 			}
 			res, err := flags.resolve(dir)
 			if err != nil {
@@ -54,6 +57,8 @@ func newAuditCmd() *cobra.Command {
 	}
 	cmd.Flags().BoolVar(&jsonOut, "json", false, "output as JSON")
 	cmd.Flags().BoolVar(&check, "check", false, "exit non-zero when any file fails (CI gating)")
+	cmd.Flags().StringSliceVar(&files, "file", nil,
+		"context file to audit (repeatable, replaces config/defaults)")
 	addScanFlags(cmd, &opts)
 	return cmd
 }
