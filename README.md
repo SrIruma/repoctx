@@ -21,6 +21,16 @@ Context files rot. A README mentions a `make release` target that no longer exis
 
 ## Install
 
+Install the prebuilt binary (no Go toolchain needed). The script detects your
+platform, verifies the release checksum, and installs to `$HOME/.local/bin`:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/SrIruma/repoctx/main/scripts/install.sh | sh
+```
+
+Pass `--version vX.Y.Z` to pin a release or `--bindir DIR` to change the
+target. Or install with Go:
+
 ```sh
 go install github.com/SrIruma/repoctx/cmd/repoctx@latest
 ```
