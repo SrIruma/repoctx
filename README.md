@@ -63,14 +63,24 @@ files = ["AGENTS.md", "CLAUDE.md"]  # context files managed by generate and audi
 - `--max-depth` and `--skip-dirs` on the command line win over the config
   file; the built-in skip list (`.git`, `node_modules`, `vendor`, …) is
   always preserved.
-- `generate` uses `files` from the config when no `--file` is given
-  (otherwise `AGENTS.md`).
-- `audit` audits `files` from the config when it is set, and `AGENTS.md` and
-  `CLAUDE.md` otherwise. The flag `--file` (repeatable) replaces config and
-  defaults for both `generate` and `audit`. A project that names its context
-  file differently therefore gets audited on that file too.
+- `generate` uses `files` from the config when no `--file` is given.
+- `audit` audits `files` from the config when it is set. The flag `--file`
+  (repeatable) replaces config and defaults for both `generate` and `audit`,
+  so a project that names its context file differently can target it directly.
+- when neither `--file` nor `files` is set, both commands discover the context
+  files in the tree: a monorepo keeps one `AGENTS.md` / `CLAUDE.md` per
+  package, and `generate` writes each scope's commands into the context file
+  that owns that subtree (paths relative to it). The root file describes the
+  whole tree; `audit` checks every discovered file. When nothing is found,
+  `generate` falls back to creating `AGENTS.md` and `audit` to the
+  `AGENTS.md` / `CLAUDE.md` defaults.
 - `--config <path>` reads the config from a specific location instead of
   `<dir>/repoctx.toml`.
+
+Manifests under `tests/`, `fixtures/`, `examples/`, `vendor/` and similar
+directories are detected and reported by `info` (with `"canonical": false`) but
+excluded from the generated tables and from context-file discovery, so a repo
+that ships test fixtures does not fill its own context file with fixture noise.
 
 ## Workspaces
 

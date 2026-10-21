@@ -68,7 +68,8 @@ $ repoctx info tests/fixtures/scanner/mono --json
       ],
       "deps": [
         "github.com/spf13/cobra"
-      ]
+      ],
+      "canonical": true
     },
     {
       "path": "package.json",
@@ -85,6 +86,7 @@ $ repoctx info tests/fixtures/scanner/mono --json
           "cmd": "npm run test"
         }
       ],
+      "canonical": true,
       "package_manager": "npm"
     },
     {
@@ -113,7 +115,8 @@ $ repoctx info tests/fixtures/scanner/mono --json
           "name": "clippy",
           "cmd": "cargo clippy"
         }
-      ]
+      ],
+      "canonical": true
     }
   ]
 }
@@ -142,6 +145,7 @@ $ repoctx info tests/fixtures/scanner/corrupt --json
       "language": "",
       "scope": "broken",
       "commands": null,
+      "canonical": true,
       "errors": [
         "invalid character 'n' looking for beginning of object key string"
       ]
@@ -160,6 +164,7 @@ $ repoctx info tests/fixtures/scanner/corrupt --json
       "deps": [
         "typescript"
       ],
+      "canonical": true,
       "package_manager": "npm"
     }
   ]
@@ -354,6 +359,7 @@ $ repoctx info tests/fixtures/scanner/workspace-npm --json
           "cmd": "npm run test"
         }
       ],
+      "canonical": true,
       "package_manager": "npm"
     },
     {
@@ -370,6 +376,7 @@ $ repoctx info tests/fixtures/scanner/workspace-npm --json
       "deps": [
         "react"
       ],
+      "canonical": true,
       "package_manager": "npm"
     },
     {
@@ -386,6 +393,7 @@ $ repoctx info tests/fixtures/scanner/workspace-npm --json
       "deps": [
         "typescript"
       ],
+      "canonical": true,
       "package_manager": "npm"
     }
   ]
@@ -427,7 +435,8 @@ $ repoctx info tests/fixtures/scanner/workspace-cargo --json
       "deps": [
         "anyhow",
         "serde"
-      ]
+      ],
+      "canonical": true
     },
     {
       "path": "crates/a/Cargo.toml",
@@ -459,7 +468,8 @@ $ repoctx info tests/fixtures/scanner/workspace-cargo --json
       "deps": [
         "serde",
         "tokio"
-      ]
+      ],
+      "canonical": true
     },
     {
       "path": "crates/b/Cargo.toml",
@@ -491,7 +501,8 @@ $ repoctx info tests/fixtures/scanner/workspace-cargo --json
       "deps": [
         "anyhow",
         "thiserror"
-      ]
+      ],
+      "canonical": true
     }
   ]
 }
