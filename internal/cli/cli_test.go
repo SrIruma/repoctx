@@ -562,3 +562,23 @@ func TestInitCreatesSkeleton(t *testing.T) {
 		t.Error("dry-run created a file")
 	}
 }
+
+func TestSkillDeterministic(t *testing.T) {
+	out1, _, code1 := execCLI(t, "skill")
+	if code1 != 0 {
+		t.Fatalf("skill exit code = %d", code1)
+	}
+	out2, _, code2 := execCLI(t, "skill")
+	if code2 != 0 {
+		t.Fatalf("skill exit code = %d", code2)
+	}
+	if out1 != out2 {
+		t.Error("skill output is not deterministic")
+	}
+	if !strings.Contains(out1, "name: repoctx") {
+		t.Error("missing frontmatter")
+	}
+	if !strings.Contains(out1, markdown.StartMarker) {
+		t.Error("missing maintenance workflow markers")
+	}
+}
