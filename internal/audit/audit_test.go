@@ -223,3 +223,37 @@ func TestAuditIgnoresConceptualReferences(t *testing.T) {
 		t.Errorf("expected pass with score 100, got score=%d passed=%v\n%+v", r.Score, r.Passed, r.Checks)
 	}
 }
+
+// A context file in a nested directory resolves its relative paths against its
+// own directory, not the repository root, and still resolves root-relative
+// paths against the root as a fallback.
+func TestAuditResolvesPathsRelativeToContextFileDir(t *testing.T) {
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, "backend"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "backend", "go.mod"),
+		[]byte("module example.com/backend\n\ngo 1.25\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "README.md"), []byte("# hi\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	nested := filepath.Join(root, "backend", "AGENTS.md")
+	// `go.mod` resolves against backend/; `README.md` only exists at the root.
+	content := "See `go.mod` and `README.md` and `missing.md`.\n"
+	if err := os.WriteFile(nested, []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	r, err := Run(Options{Root: root, File: nested})
+	if err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+	c := checkByName(r, "paths")
+	if c == nil {
+		t.Fatal("no paths check")
+	}
+	if len(c.Issues) != 1 || c.Issues[0].Path != "missing.md" {
+		t.Errorf("expected only missing.md to be stale, got %+v", c.Issues)
+	}
+}

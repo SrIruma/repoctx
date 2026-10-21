@@ -24,6 +24,7 @@
         "react",
         "typescript"
       ],
+      "canonical": true,
       "package_manager": "yarn"
     }
   ]

@@ -437,7 +437,7 @@ func TestWorkspaceNPMCommandsPolicy(t *testing.T) {
 	if err != nil {
 		t.Fatalf("loadProject: %v", err)
 	}
-	rows := tableRows(p)
+	rows := tableRows(p, ".")
 
 	want := []markdown.Row{
 		{Command: "npm run build", Source: "package.json"},
@@ -471,7 +471,7 @@ func TestWorkspaceCargoCommandsPolicy(t *testing.T) {
 	if err != nil {
 		t.Fatalf("loadProject: %v", err)
 	}
-	rows := tableRows(p)
+	rows := tableRows(p, ".")
 
 	want := []markdown.Row{
 		{Command: "cargo build", Source: "Cargo.toml"},

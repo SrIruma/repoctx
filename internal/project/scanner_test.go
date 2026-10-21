@@ -1,6 +1,7 @@
 package project
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 )
@@ -189,6 +190,102 @@ func TestScannerWorkspaceCargo(t *testing.T) {
 		}
 		if p.Manifests[i].Scope != w.scope {
 			t.Errorf("manifests[%d].Scope = %q, want %q", i, p.Manifests[i].Scope, w.scope)
+		}
+	}
+}
+
+func TestScannerDiscoversNestedContextFiles(t *testing.T) {
+	root := filepath.Join("..", "..", "tests", "fixtures", "scanner", "nested-context")
+	p, err := NewScanner(root).Scan()
+	if err != nil {
+		t.Fatalf("scan: %v", err)
+	}
+	want := []string{
+		"AGENTS.md",
+		"backend/AGENTS.md",
+		"frontend/CLAUDE.md",
+	}
+	if len(p.ContextFiles) != len(want) {
+		t.Fatalf("expected %d context files, got %d: %+v", len(want), len(p.ContextFiles), p.ContextFiles)
+	}
+	for i, w := range want {
+		if p.ContextFiles[i] != w {
+			t.Errorf("ContextFiles[%d] = %q, want %q", i, p.ContextFiles[i], w)
+		}
+	}
+}
+
+func TestScannerContextFilesRespectMaxDepth(t *testing.T) {
+	root := filepath.Join("..", "..", "tests", "fixtures", "scanner", "nested-context")
+	sc := NewScanner(root)
+	sc.MaxDepth = 1
+	p, err := sc.Scan()
+	if err != nil {
+		t.Fatalf("scan: %v", err)
+	}
+	if len(p.ContextFiles) != 1 || p.ContextFiles[0] != "AGENTS.md" {
+		t.Errorf("MaxDepth 1: expected only root AGENTS.md, got %+v", p.ContextFiles)
+	}
+}
+
+func TestScannerMarksFixtureManifestsNonCanonical(t *testing.T) {
+	root := filepath.Join("..", "..", "tests", "fixtures", "scanner", "mono")
+	p, err := NewScanner(root).Scan()
+	if err != nil {
+		t.Fatalf("scan: %v", err)
+	}
+	for _, m := range p.Manifests {
+		if !m.Canonical {
+			t.Errorf("manifest %q scanned as root should be canonical", m.Path)
+		}
+	}
+}
+
+func TestIsCanonical(t *testing.T) {
+	cases := []struct {
+		path string
+		want bool
+	}{
+		{"package.json", true},
+		{"backend/go.mod", true},
+		{"internal/cli/audit.go", true},
+		{"tests/fixtures/go/go.mod", false},
+		{"test/package.json", false},
+		{"examples/demo/Cargo.toml", false},
+		{"vendor/lib/package.json", false},
+		{"node_modules/pkg/package.json", false},
+	}
+	for _, tc := range cases {
+		if got := IsCanonical(tc.path); got != tc.want {
+			t.Errorf("IsCanonical(%q) = %v, want %v", tc.path, got, tc.want)
+		}
+	}
+}
+
+func TestScannerExcludesContextFilesUnderFixtures(t *testing.T) {
+	// A context file inside a test/fixture tree is not part of the canonical
+	// surface and must not be discovered.
+	dir := t.TempDir()
+	for _, rel := range []string{"AGENTS.md", "tests/fixtures/x/AGENTS.md", "docs/CLAUDE.md"} {
+		full := filepath.Join(dir, filepath.FromSlash(rel))
+		if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(full, []byte("x"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	p, err := NewScanner(dir).Scan()
+	if err != nil {
+		t.Fatalf("scan: %v", err)
+	}
+	want := []string{"AGENTS.md", "docs/CLAUDE.md"}
+	if len(p.ContextFiles) != len(want) {
+		t.Fatalf("ContextFiles = %+v, want %+v", p.ContextFiles, want)
+	}
+	for i, w := range want {
+		if p.ContextFiles[i] != w {
+			t.Errorf("ContextFiles[%d] = %q, want %q", i, p.ContextFiles[i], w)
 		}
 	}
 }

@@ -1,0 +1,7 @@
+{
+  "name": "nested-context-root",
+  "scripts": {
+    "build": "echo root build",
+    "test": "echo root test"
+  }
+}

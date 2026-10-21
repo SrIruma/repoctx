@@ -489,3 +489,86 @@ func TestAuditFileFlagSelectsNestedPath(t *testing.T) {
 		t.Errorf("audit should report the nested file named by --file, output:\n%s", out)
 	}
 }
+
+// Nested context discovery: without --file or config, generate writes the
+// tables of each scope into the context file that owns it.
+func TestGenerateSplitsByScopeWithoutFlags(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "Makefile"), "test:\n\t@echo hi\n")
+	writeFile(t, filepath.Join(dir, "backend", "go.mod"),
+		"module example.com/backend\n\ngo 1.25\n")
+	writeContext(t, filepath.Join(dir, "AGENTS.md"), "make test")
+	writeContext(t, filepath.Join(dir, "backend", "AGENTS.md"), "go test ./...")
+
+	_, errOut, code := execCLI(t, "generate", dir)
+	if code != 0 {
+		t.Fatalf("generate exit code = %d, stderr:\n%s", code, errOut)
+	}
+	rootData, err := os.ReadFile(filepath.Join(dir, "AGENTS.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Root owns the whole tree: it sees both the Makefile and the Go module.
+	if !strings.Contains(string(rootData), "make test") ||
+		!strings.Contains(string(rootData), "go test ./...") {
+		t.Errorf("root AGENTS.md should list the whole tree:\n%s", rootData)
+	}
+	nestedData, err := os.ReadFile(filepath.Join(dir, "backend", "AGENTS.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	// The nested file owns only backend/, with paths relative to backend/.
+	if !strings.Contains(string(nestedData), "go test ./...") {
+		t.Errorf("backend AGENTS.md should list the Go module:\n%s", nestedData)
+	}
+	if strings.Contains(string(nestedData), "make test") {
+		t.Errorf("backend AGENTS.md should not list the root Makefile:\n%s", nestedData)
+	}
+	if !strings.Contains(string(nestedData), "| `go.mod` |") {
+		t.Errorf("backend AGENTS.md paths should be relative to its scope:\n%s", nestedData)
+	}
+}
+
+// A context file under a test/fixture tree is not canonical and is neither
+// discovered nor regenerated.
+func TestGenerateSkipsContextFilesUnderFixtures(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "Makefile"), "test:\n\t@echo hi\n")
+	writeContext(t, filepath.Join(dir, "AGENTS.md"), "make test")
+	writeContext(t, filepath.Join(dir, "tests", "fixtures", "x", "AGENTS.md"), "make stale")
+
+	_, errOut, code := execCLI(t, "generate", dir)
+	if code != 0 {
+		t.Fatalf("generate exit code = %d, stderr:\n%s", code, errOut)
+	}
+	data, err := os.ReadFile(filepath.Join(dir, "tests", "fixtures", "x", "AGENTS.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(data), "make stale") {
+		t.Errorf("fixture context file must not be rewritten:\n%s", data)
+	}
+}
+
+// audit discovers and reports every context file in the tree.
+func TestAuditDiscoversNestedContextFiles(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "Makefile"), "test:\n\t@echo hi\n")
+	writeFile(t, filepath.Join(dir, "backend", "go.mod"),
+		"module example.com/backend\n\ngo 1.25\n")
+	writeContext(t, filepath.Join(dir, "AGENTS.md"), "make test")
+	writeContext(t, filepath.Join(dir, "backend", "AGENTS.md"), "go test ./...")
+
+	out, errOut, code := execCLI(t, "audit", dir, "--check")
+	if code != 0 {
+		t.Fatalf("audit exit code = %d, stderr:\n%s\n%s", code, errOut, out)
+	}
+	// The nested file cites go.mod relative to its own directory; it must not
+	// be reported as a stale path.
+	if strings.Contains(out, "stale path") {
+		t.Errorf("nested path should resolve relative to its context file:\n%s", out)
+	}
+	if !strings.Contains(out, filepath.Join("backend", "AGENTS.md")) {
+		t.Errorf("audit should report the nested context file:\n%s", out)
+	}
+}

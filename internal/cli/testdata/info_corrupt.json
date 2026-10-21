@@ -7,6 +7,7 @@
       "language": "",
       "scope": "broken",
       "commands": null,
+      "canonical": true,
       "errors": [
         "invalid character 'n' looking for beginning of object key string"
       ]
@@ -25,6 +26,7 @@
       "deps": [
         "typescript"
       ],
+      "canonical": true,
       "package_manager": "npm"
     }
   ]
