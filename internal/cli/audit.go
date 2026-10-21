@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/SrIruma/repoctx/internal/audit"
+	"github.com/SrIruma/repoctx/internal/config"
 	"github.com/SrIruma/repoctx/internal/project"
 )
 
@@ -33,11 +34,29 @@ func newAuditCmd() *cobra.Command {
 			"paths referenced anywhere in the file. Reports a health score per file.\n" +
 			"With --check the command exits non-zero when any file fails, so it can\n" +
 			"gate merges in CI.",
-		Args: cobra.MaximumNArgs(1),
+		Args: cobra.ArbitraryArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			dir := "."
-			if len(args) == 1 {
-				dir = args[0]
+			roots := args
+			if len(roots) == 0 {
+				roots = []string{"."}
+			}
+			// Fleet mode: a single root whose config lists `roots` expands to
+			// multiple roots, resolved relative to the config directory.
+			if len(roots) == 1 {
+				cfg, err := config.Load(roots[0])
+				if err == nil && len(cfg.Roots) > 0 {
+					base := roots[0]
+					absBase, _ := filepath.Abs(base)
+					expanded := make([]string, 0, len(cfg.Roots))
+					for _, r := range cfg.Roots {
+						if filepath.IsAbs(r) {
+							expanded = append(expanded, r)
+						} else {
+							expanded = append(expanded, filepath.Join(absBase, r))
+						}
+					}
+					roots = expanded
+				}
 			}
 			flags := scanFlags{
 				maxDepth:    opts.maxDepth,
@@ -48,11 +67,7 @@ func newAuditCmd() *cobra.Command {
 				skipDirsSet: cmd.Flags().Changed("skip-dirs"),
 				filesSet:    cmd.Flags().Changed("file"),
 			}
-			res, err := flags.resolve(dir)
-			if err != nil {
-				return err
-			}
-			return runAudit(cmd, dir, jsonOut, check, res)
+			return runAudit(cmd, roots, jsonOut, check, flags)
 		},
 	}
 	cmd.Flags().BoolVar(&jsonOut, "json", false, "output as JSON")
@@ -63,58 +78,130 @@ func newAuditCmd() *cobra.Command {
 	return cmd
 }
 
-func runAudit(cmd *cobra.Command, dir string, jsonOut, check bool, opts resolved) error {
-	abs, err := filepath.Abs(dir)
-	if err != nil {
-		return err
+func runAudit(cmd *cobra.Command, roots []string, jsonOut, check bool, flags scanFlags) error {
+	type rootReport struct {
+		Root  string          `json:"root"`
+		Files []*audit.Report `json:"files"`
 	}
-	p, err := loadProject(abs, opts)
-	if err != nil {
-		return err
-	}
-	var actual []project.Command
-	for _, m := range p.Manifests {
-		if !m.Canonical {
-			continue
-		}
-		actual = append(actual, m.Commands...)
-	}
+	var allReports []rootReport
+	var flatReports []*audit.Report
+	totalPassed := 0
+	totalFiles := 0
+	anyFailed := false
 
-	var reports []*audit.Report
-	targets := contextTargets(p, opts, defaultContextFiles)
-	for _, name := range contextFiles(abs, targets) {
-		r, err := audit.Run(audit.Options{
-			Root:   abs,
-			File:   filepath.Join(abs, name),
-			Actual: actual,
-		})
+	for _, r := range roots {
+		abs, err := filepath.Abs(r)
 		if err != nil {
-			return fmt.Errorf("%s: %w", name, err)
-		}
-		reports = append(reports, r)
-	}
-	if len(reports) == 0 {
-		fmt.Fprintf(cmd.OutOrStdout(), "no context files (%s) found in %s\n",
-			strings.Join(targets, ", "), abs)
-		return nil
-	}
-	if jsonOut {
-		enc := json.NewEncoder(cmd.OutOrStdout())
-		enc.SetIndent("", "  ")
-		if err := enc.Encode(reports); err != nil {
 			return err
 		}
-	} else {
-		for _, r := range reports {
-			printReport(cmd.OutOrStdout(), r)
+		res, err := flags.resolve(r)
+		if err != nil {
+			return err
 		}
-	}
-	if check {
-		for _, r := range reports {
-			if !r.Passed {
-				return &exitError{code: 1}
+		p, err := loadProject(abs, res)
+		if err != nil {
+			return err
+		}
+		var actual []project.Command
+		for _, m := range p.Manifests {
+			if !m.Canonical {
+				continue
+			}
+			actual = append(actual, m.Commands...)
+		}
+		targets := contextTargets(p, res, defaultContextFiles)
+		var reports []*audit.Report
+		for _, name := range contextFiles(abs, targets) {
+			rep, err := audit.Run(audit.Options{
+				Root:   abs,
+				File:   filepath.Join(abs, name),
+				Actual: actual,
+			})
+			if err != nil {
+				return fmt.Errorf("%s: %w", name, err)
+			}
+			reports = append(reports, rep)
+		}
+		for _, rep := range reports {
+			if !rep.Passed {
+				anyFailed = true
+			}
+			totalFiles++
+			if rep.Passed {
+				totalPassed++
 			}
 		}
+		allReports = append(allReports, rootReport{Root: abs, Files: reports})
+		flatReports = append(flatReports, reports...)
+
+		if !jsonOut && len(roots) > 1 {
+			fmt.Fprintf(cmd.OutOrStdout(), "=== %s ===\n", abs)
+		}
+		if len(reports) == 0 {
+			if !jsonOut {
+				fmt.Fprintf(cmd.OutOrStdout(), "no context files (%s) found in %s\n",
+					strings.Join(targets, ", "), abs)
+			}
+		}
+		if !jsonOut {
+			for _, rep := range reports {
+				printReport(cmd.OutOrStdout(), rep)
+			}
+		}
+	}
+
+	if jsonOut {
+		if len(roots) == 1 {
+			enc := json.NewEncoder(cmd.OutOrStdout())
+			enc.SetIndent("", "  ")
+			if err := enc.Encode(flatReports); err != nil {
+				return err
+			}
+		} else {
+			fleetScore := 0
+			if totalFiles > 0 {
+				fleetScore = totalPassed * 100 / totalFiles
+			}
+			out := struct {
+				Roots      []string     `json:"roots"`
+				Reports    []rootReport `json:"reports"`
+				FleetScore int          `json:"fleet_score"`
+				Passed     bool         `json:"passed"`
+			}{
+				Roots: func() []string {
+					r := make([]string, 0, len(allReports))
+					for _, x := range allReports {
+						r = append(r, x.Root)
+					}
+					return r
+				}(),
+				Reports:    allReports,
+				FleetScore: fleetScore,
+				Passed:     !anyFailed,
+			}
+			enc := json.NewEncoder(cmd.OutOrStdout())
+			enc.SetIndent("", "  ")
+			if err := enc.Encode(out); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(roots) > 1 && !jsonOut {
+		fleetScore := 0
+		if totalFiles > 0 {
+			fleetScore = totalPassed * 100 / totalFiles
+		}
+		status := "PASS"
+		if anyFailed {
+			status = "FAIL"
+		}
+		fmt.Fprintf(cmd.OutOrStdout(), "\nFleet: %s  score %d/100  (%d/%d files passed)\n",
+			status, fleetScore, totalPassed, totalFiles)
+	}
+
+	if check && anyFailed {
+		return &exitError{code: 1}
 	}
 	return nil
 }

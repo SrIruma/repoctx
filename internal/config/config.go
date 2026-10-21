@@ -19,6 +19,10 @@ type Config struct {
 	SkipDirs []string `toml:"skip_dirs"`
 	MaxDepth int      `toml:"max_depth"`
 	Files    []string `toml:"files"`
+	// Roots lists repository directories for fleet mode (audit only). When set,
+	// `repoctx audit <dir>` expands to auditing each listed root. Paths are
+	// resolved relative to the directory containing the config file.
+	Roots []string `toml:"roots"`
 }
 
 // Load reads FileName inside dir. A missing file returns a zero-value Config
