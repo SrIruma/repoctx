@@ -1,14 +1,14 @@
 # Roadmap
 
-Estado actual: **v0.7.0** (Fase 0 cerrada). Contrato en 0.x, no congelado.
+Estado actual: **v0.8.0** (Fase 1 cerrada). Contrato en 0.x, no congelado.
 
-## En curso — Fase 1 · v0.8.0 "bootstrap"
+## Completado — Fase 1 · v0.8.0 "bootstrap"
 
 - [x] `repoctx init` — esqueleto de contexto desde cero
 - [x] `repoctx skill` — SKILL.md canónico generado
-- [ ] `docs/roadmap.md` (este archivo)
+- [x] `docs/roadmap.md` público
 
-## Próximo — Fase 2 · v0.9.0 "fleet + skill gratis"
+## En curso — Fase 2 · v0.9.0 "fleet + skill gratis"
 
 - [ ] `repoctx audit` multi-repo
 - [ ] `fleet.toml` / roots en config
