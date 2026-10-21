@@ -5,6 +5,15 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `audit` accepts a repeatable `--file` flag to select which context files to
+  audit. When set, it replaces both the `files` list from `repoctx.toml` and
+  the `AGENTS.md` / `CLAUDE.md` defaults, mirroring `generate --file`, so a
+  project can gate CI on a context file that lives outside the configured set.
+
 ## [v0.7.0] - 2026-10-21
 
 ### Fixed
