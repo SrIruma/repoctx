@@ -46,12 +46,16 @@ return the code silently.
 | `--check` | `audit` | Exit `1` when any file fails (CI gating). |
 | `--file` | `generate` | Context file(s) to update; repeatable. |
 | `--file` | `audit` | Context file(s) to audit; repeatable. When set, replaces `files` from `repoctx.toml` and the defaults (`AGENTS.md`, `CLAUDE.md`). |
-| `--dry-run` | `generate` | Preview changes without writing; exit `0`. |
+| `--dry-run` | `generate`, `init` | Preview changes without writing; exit `0`. |
+| `--force` | `init` | Overwrite an existing context file. |
+| `--format` | `skill` | Target agent hint (`claude`, `cursor`, `agents`, `opencode`); output is identical. |
 | `--config` | `info`, `generate`, `audit` | Explicit path to `repoctx.toml`. |
 | `--max-depth` | `info`, `generate`, `audit` | Scan depth limit (default `6`); must be positive. |
 | `--skip-dirs` | `info`, `generate`, `audit` | Extra directories to skip; repeatable. |
 
 `--json` output is indented JSON (two spaces) written to stdout.
+
+`init` writes the skeleton to the target file (or stdout with `--dry-run`). `skill` writes the canonical `SKILL.md` to stdout; its output is stable and deterministic.
 
 ## `info --json` schema
 
