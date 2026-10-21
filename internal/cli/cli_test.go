@@ -522,3 +522,43 @@ func duplicateRows(rows []markdown.Row) []markdown.Row {
 	}
 	return dup
 }
+
+func TestInitCreatesSkeleton(t *testing.T) {
+	dir := writeTestProject(t, "")
+	out, errOut, code := execCLI(t, "init", dir)
+	if code != 0 {
+		t.Fatalf("init exit code = %d, stderr:\n%s", code, errOut)
+	}
+	if !strings.Contains(out, "created") {
+		t.Errorf("expected 'created' message, got:\n%s", out)
+	}
+	data, err := os.ReadFile(filepath.Join(dir, "AGENTS.md"))
+	if err != nil {
+		t.Fatalf("AGENTS.md not created: %v", err)
+	}
+	if !strings.Contains(string(data), markdown.StartMarker) {
+		t.Errorf("markers missing:\n%s", string(data))
+	}
+	if !strings.Contains(string(data), "<!-- TODO:") {
+		t.Errorf("TODO markers missing:\n%s", string(data))
+	}
+	// second run refuses without --force
+	_, _, code = execCLI(t, "init", dir)
+	if code == 0 {
+		t.Error("expected non-zero exit when file exists")
+	}
+	// --force overwrites
+	_, errOut, code = execCLI(t, "init", dir, "--force")
+	if code != 0 {
+		t.Fatalf("force exit code = %d, stderr:\n%s", code, errOut)
+	}
+	// --dry-run writes nothing
+	tmp := filepath.Join(dir, "DRY.md")
+	_, _, code = execCLI(t, "init", dir, "--file", "DRY.md", "--dry-run")
+	if code != 0 {
+		t.Fatalf("dry-run exit code = %d", code)
+	}
+	if _, err := os.Stat(tmp); err == nil {
+		t.Error("dry-run created a file")
+	}
+}
