@@ -1,0 +1,23 @@
+{
+  "name": "@sriruma/repoctx-darwin-x64",
+  "version": "0.7.0",
+  "description": "repoctx prebuilt binary for darwin/x64.",
+  "license": "MIT",
+  "author": "SrIruma",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SrIruma/repoctx.git"
+  },
+  "os": [
+    "darwin"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "files": [
+    "bin"
+  ],
+  "bin": {
+    "repoctx": "bin/repoctx"
+  }
+}

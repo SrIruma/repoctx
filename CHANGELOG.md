@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `@sriruma/repoctx` is now publishable to npm: a main package with a `bin` shim plus six platform packages (`optionalDependencies`, gated by `os`/`cpu`), so `npx @sriruma/repoctx` works without a Go toolchain. `scripts/npm-stage.sh` stages the release binaries into the platform packages; the release workflow publishes all seven packages when `NPM_TOKEN` is set.
+
 - `scripts/install.sh` installs the prebuilt binary from a GitHub release
   without a Go toolchain: it detects the platform, verifies the download
   against the release's `SHA256SUMS.txt`, and fails closed on a mismatch.
