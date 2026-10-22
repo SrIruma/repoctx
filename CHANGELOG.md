@@ -20,6 +20,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   canonical skill stays a single file, so the in-repo agent channels are
   unaffected.
 
+### Added
+
+- The canonical SKILL.md defines an **output format** for audit reports: the
+  shape the agent uses when it reports what the audit found. Every channel
+  copy (Claude, opencode, agents, Cursor) is updated with it.
+
 ### Fixed
 
 - `audit` no longer reports phantom stale paths. Path candidates are collected
