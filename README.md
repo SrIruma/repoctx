@@ -66,10 +66,18 @@ coding agents when and how to use it. The same file is published to every channe
 - **opencode**: `.opencode/skills/repoctx/SKILL.md` (and `.agents/skills/`)
 - **URL**: `https://raw.githubusercontent.com/SrIruma/repoctx/main/skills/repoctx/SKILL.md`
   (opencode consumes it via `skills.urls`)
-- **Agensi.io**: published as a ZIP
+- **Agensi.io**: ZIP listing (publication pending)
 
 Install the skill by copying `skills/repoctx/SKILL.md` to your agent's skill
 directory, or point your agent at the URL above.
+
+### Teams: repoctx+
+
+The free skill covers a single repository. `repoctx+` is the paid tier for
+teams: per-stack playbooks (Java, SaaS, monorepo, microservices, game-dev),
+versioned `repoctx.toml` policies, `AGENTS.md` templates, a fleet-wide audit
+and a quarterly human drift audit. The engine stays MIT — what is sold is the
+curated knowledge and the service around it.
 
 ## Commands
 

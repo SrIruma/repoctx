@@ -13,10 +13,15 @@ signals to track and the thresholds that trigger a decision.
 | Skill stars | GitHub (skill repo) / Agensi | star count |
 | Skill installs per channel | Claude marketplace, Agensi, `.well-known` hits | channel dashboards |
 | Teams with >3 repos using it | qualitative (issues, emails) | manual |
+| Paid listing funnel | Agensi Creator Studio | page views → add to carts → conversions → revenue |
 
 ## Cadence
 
 Weekly snapshot during Fase 2 (8 weeks). Record in a simple table or issue.
+
+The paid listing on Agensi is the shortest path to a real signal: it shows
+page views, carts, conversions and revenue for the thing you are actually
+selling. Check it weekly from the day the listing goes live.
 
 ## Kill criteria (week 8)
 
@@ -31,4 +36,8 @@ If any signal is strong, proceed to Fase 3.
 
 ## Decision date
 
-2027-01-26 (per PLAN.md §8 timeline). Record the decision in `docs/roadmap.md`.
+2026-12-14 (per PLAN.md §8 timeline). Record the decision in `docs/roadmap.md`.
+
+The date moved up from 2027-01-26 on 2026-10-21: the paid listing on Agensi
+is the measurement instrument, and it exists from the day it is published, so
+there is no reason to wait for a separate phase to finish.
