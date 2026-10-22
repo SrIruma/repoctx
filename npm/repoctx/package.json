@@ -1,6 +1,6 @@
 {
   "name": "@sriruma/repoctx",
-  "version": "0.7.0",
+  "version": "0.10.0",
   "description": "Keep your AI coding-agent context files (AGENTS.md, CLAUDE.md) truthful.",
   "license": "MIT",
   "author": "SrIruma",
@@ -21,17 +21,18 @@
     "repoctx": "bin/repoctx.js"
   },
   "files": [
-    "bin"
+    "bin",
+    "README.md"
   ],
   "engines": {
     "node": ">=18"
   },
   "optionalDependencies": {
-    "@sriruma/repoctx-darwin-arm64": "0.7.0",
-    "@sriruma/repoctx-darwin-x64": "0.7.0",
-    "@sriruma/repoctx-linux-arm64": "0.7.0",
-    "@sriruma/repoctx-linux-x64": "0.7.0",
-    "@sriruma/repoctx-win32-arm64": "0.7.0",
-    "@sriruma/repoctx-win32-x64": "0.7.0"
+    "@sriruma/repoctx-darwin-arm64": "0.10.0",
+    "@sriruma/repoctx-darwin-x64": "0.10.0",
+    "@sriruma/repoctx-linux-arm64": "0.10.0",
+    "@sriruma/repoctx-linux-x64": "0.10.0",
+    "@sriruma/repoctx-win32-arm64": "0.10.0",
+    "@sriruma/repoctx-win32-x64": "0.10.0"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@sriruma/repoctx-linux-x64",
-  "version": "0.7.0",
+  "version": "0.10.0",
   "description": "repoctx prebuilt binary for linux/x64.",
   "license": "MIT",
   "author": "SrIruma",
@@ -15,7 +15,8 @@
     "x64"
   ],
   "files": [
-    "bin"
+    "bin",
+    "README.md"
   ],
   "bin": {
     "repoctx": "bin/repoctx"
