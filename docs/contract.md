@@ -23,7 +23,8 @@ Failures that exit `1` include:
 
 - invalid usage or arguments (`--max-depth 0`, unknown flags, too many args);
 - an unrecoverable scan error;
-- `audit --check` detecting rot in any context file;
+- `audit --check` detecting rot in any context file (a *new* finding only,
+  when `--since` is given);
 - `generate` targeting a file that exists but has no repoctx markers.
 
 Two soft-failure cases deliberately keep the exit code at `0`:
@@ -44,6 +45,7 @@ return the code silently.
 |---|---|---|
 | `--json` | `info`, `audit` | Machine-readable output on stdout. |
 | `--check` | `audit` | Exit `1` when any file fails (CI gating). |
+| `--since <rev>` | `audit` | Incremental audit: only findings on lines changed since `<rev>` fail. |
 | `--file` | `generate` | Context file(s) to update; repeatable. |
 | `--file` | `audit` | Context file(s) to audit; repeatable. When set, replaces `files` from `repoctx.toml` and the defaults (`AGENTS.md`, `CLAUDE.md`). |
 | `--dry-run` | `generate`, `init` | Preview changes without writing; exit `0`. |
@@ -75,6 +77,28 @@ roots the JSON shape becomes:
 A single root whose `repoctx.toml` contains a `roots = [...]` list expands to
 fleet mode automatically (paths resolved relative to the config file). Exit code
 is `1` when any file in any root fails (`--check`).
+
+## Incremental audit (`--since`)
+
+`audit --since <rev>` compares the audited context files against a git revision
+and classifies every finding by whether the line it came from was added or
+changed since `<rev>`:
+
+- **new** — the finding's line is part of the diff since `<rev>`. Only new
+  findings fail the run.
+- **pre-existing** — the finding exists but predates `<rev>`. It is reported
+  but does not fail the run.
+
+This lets a fleet adopt `--check` in CI without first fixing every repository:
+the gate fires only on drift the change introduced. `<rev>` is anything
+`git rev-parse` accepts (`HEAD`, a branch, a sha, `origin/main`). A file absent
+from `<rev>` (added, renamed, or untracked) counts as entirely new.
+
+Without `--since`, behaviour is unchanged: every finding fails. `--since`
+requires the audited root to be inside a git working tree; it errors otherwise,
+and errors when `<rev>` cannot be resolved. The engine itself never shells out
+to git — the CLI computes the changed-line set (`internal/cli/changes.go`) and
+passes it to the pure `internal/audit` package.
 
 `init` writes the skeleton to the target file (or stdout with `--dry-run`). `skill` writes the canonical `SKILL.md` to stdout; its output is stable and deterministic.
 
@@ -152,12 +176,17 @@ context file in fixture noise.
 | `file` | string | Absolute path of the audited context file. |
 | `checks` | array | One entry per check (`commands`, `paths`). |
 | `checks[].name` | string | Check identifier. |
-| `checks[].passed` | boolean | Whether the check found no rot. |
+| `checks[].passed` | boolean | Whether the check found no rot. With `--since`, a check passes when it has no *new* findings, even if pre-existing ones remain. |
 | `checks[].detail` | string | Human summary. |
 | `checks[].issues` | array | Rot findings; omitted when the check passes. |
-| `checks[].issues[]` | object | `{command?, path?, detail}`; exactly one of `command`/`path` plus `detail`. |
+| `checks[].issues[]` | object | `{command?, path?, detail, line?, scope?}`; exactly one of `command`/`path` plus `detail`. `line` is the 1-based context-file line the finding came from. `scope` is present only with `--since` and is `new` or `pre-existing`. |
 | `score` | integer | `0`–`100`; `100` only when every check passed. |
 | `passed` | boolean | `true` exactly when `score == 100`. |
+| `new_issues` | integer | Only with `--since`: findings introduced since the base. Omitted when zero. |
+| `pre_existing` | integer | Only with `--since`: inherited findings, reported but not gating. Omitted when zero. |
+
+In fleet mode the top-level object additionally carries `since`, `new_issues`
+and `pre_existing` (echoing the base and the totals) when `--since` is used.
 
 ### Which files are audited
 

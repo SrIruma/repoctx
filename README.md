@@ -81,7 +81,7 @@ To publish it to a skill marketplace, build the package with
 |---|---|
 | `repoctx info [dir]` | Detect manifests and extract facts from a repository. Manifests that fail to parse are kept in the report with a `!` warning (and an `errors` field in `--json`). |
 | `repoctx generate [dir]` | Regenerate the code-derived sections of a context file (`AGENTS.md` by default, or the `files` from `repoctx.toml` / `--file`) between repoctx markers. `--dry-run` previews what would change without writing. |
-| `repoctx audit [dir]` | Detect context rot: stale paths and ghost commands, with a health score. `--check` exits non-zero on failure for CI gating. Use `--file` to override. |
+| `repoctx audit [dir]` | Detect context rot: stale paths and ghost commands, with a health score. `--check` exits non-zero on failure for CI gating; `--since <rev>` fails only on drift introduced since a revision. Use `--file` to override. |
 | `repoctx workflow [file ...]` | Print a paste-ready block telling agents how to keep the context file truthful. |
 
 Run `repoctx <command> --help` for full usage. `info`, `generate` and `audit`
@@ -184,6 +184,13 @@ It composes with `--json` for machine-readable failures:
 
 ```yaml
 - run: repoctx audit . --check --json
+```
+
+Add `--since` to gate only on drift the change introduced, so inherited rot in
+an existing repository does not make the job red from the first commit:
+
+```yaml
+- run: repoctx audit . --since "origin/${{ github.base_ref }}" --check
 ```
 
 ## How it works

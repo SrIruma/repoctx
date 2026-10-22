@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `repoctx audit --since <rev>` runs an incremental audit: findings whose line
+  was added or changed since `<rev>` are "new" and gate the run; inherited
+  findings are "pre-existing" and are reported without failing. This lets a
+  fleet adopt `--check` in CI without first cleaning every repository. `--json`
+  gains `line` on each issue, `scope` (`new`/`pre-existing`) with `--since`, and
+  `new_issues`/`pre_existing` per file (plus `since` and totals in fleet mode).
+  The engine stays a pure function of the filesystem: the CLI computes the
+  changed-line set with a zero-context `git diff` (`internal/cli/changes.go`) and
+  passes it to `internal/audit`. Without `--since`, behaviour is unchanged.
+
+### Added
+
 - `make skill-package` builds `dist/repoctx-skill.zip`, the package to upload to
   a skill marketplace: a single `repoctx/SKILL.md` folder. The build fails if
   the frontmatter name does not match the folder, if the description is missing,
