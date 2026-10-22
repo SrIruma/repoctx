@@ -48,6 +48,7 @@ The code is split into small, single-purpose packages:
 | `make docs-examples` | `Makefile` |
 | `make install` | `Makefile` |
 | `make release` | `Makefile` |
+| `make skill-package` | `Makefile` |
 | `make test` | `Makefile` |
 | `go build ./...` | `go.mod` |
 | `go test ./...` | `go.mod` |

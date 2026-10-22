@@ -6,6 +6,7 @@
 #   make install               # go install -> $GOBIN/repoctx
 #   make release VERSION=v0.1.0  # dist/ binaries + SHA256SUMS.txt
 #   make docs-examples          # regenerate docs/examples.md from real CLI output
+#   make skill-package          # dist/repoctx-skill.zip (marketplace upload)
 #   make clean
 
 GO      ?= go
@@ -19,7 +20,7 @@ LD_FLAGS = -X github.com/SrIruma/repoctx/internal/cli.version=$(VERSION)
 # extra target is another artifact to verify.
 PLATFORMS ?= linux/amd64 linux/arm64 windows/amd64 windows/arm64 darwin/amd64 darwin/arm64
 
-.PHONY: all build test install release docs-examples clean
+.PHONY: all build test install release docs-examples skill-package clean
 
 all: build
 
@@ -58,3 +59,6 @@ clean: ## Remove local build artifacts.
 
 docs-examples: build ## Regenerate docs/examples.md from the real CLI output.
 	scripts/gen-examples.sh
+
+skill-package: build ## Build dist/repoctx-skill.zip, ready for a marketplace listing.
+	scripts/package-skill.sh

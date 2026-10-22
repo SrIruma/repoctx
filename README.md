@@ -71,6 +71,10 @@ coding agents when and how to use it. The same file is published to every channe
 Install the skill by copying `skills/repoctx/SKILL.md` to your agent's skill
 directory, or point your agent at the URL above.
 
+To publish it to a skill marketplace, build the package with
+`make skill-package` — it produces `dist/repoctx-skill.zip` (a single
+`repoctx/SKILL.md` folder) and fails if the skill drifted from the CLI output.
+
 ## Commands
 
 | Command | Description |

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `make skill-package` builds `dist/repoctx-skill.zip`, the package to upload to
+  a skill marketplace: a single `repoctx/SKILL.md` folder. The build fails if
+  the frontmatter name does not match the folder, if the description is missing,
+  or if the skill drifted from `repoctx skill` output.
+
 ### Fixed
 
 - `audit` no longer reports phantom stale paths. Path candidates are collected
