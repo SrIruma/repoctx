@@ -34,6 +34,30 @@ repoctx keeps AI coding-agent context files (AGENTS.md, CLAUDE.md, .cursorrules)
 - Run `repoctx audit . --check` before finishing; fix anything it reports.
 - Prefer `--file` to target a specific context file; otherwise repoctx discovers all AGENTS.md/CLAUDE.md in the tree.
 
+## Output format
+
+When you report an audit result, use this shape:
+
+```markdown
+## Context health
+
+**File:** AGENTS.md · **Score:** <score>/100
+
+| Check | Result |
+|---|---|
+| commands | 11 claimed, all found |
+| paths | 9 referenced, 1 stale |
+
+### What to fix
+- `docs/api.md` — referenced in the context file, but the file moved.
+
+### How to fix
+- update the path, or run `repoctx generate .` if the command list changed
+```
+
+- Quote the exact path or command the audit reported. Never paraphrase it.
+- If every check passes, say so in one line and stop. Do not invent findings.
+
 ## Troubleshooting
 
 - `no context files found`: the repo has no AGENTS.md/CLAUDE.md; run `repoctx init`.
