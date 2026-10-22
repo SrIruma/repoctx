@@ -177,7 +177,7 @@ func TestCandidatePaths(t *testing.T) {
 // Those used to be reported as stale paths that do not exist.
 func TestCandidatePathsIgnoresMultilineSpans(t *testing.T) {
 	content := "The engine is MIT.\n" +
-		"- use `repoctx-plus` for the paid tier.\n" +
+		"- use `repoctx` for the CLI.\n" +
 		"```sh\n./package.sh        # builds the package\n```\n" +
 		"Real path: `scripts/setup.sh`"
 	got := candidatePaths(content)
