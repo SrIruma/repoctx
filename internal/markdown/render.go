@@ -7,9 +7,14 @@ import (
 
 // Row is one entry in the generated commands table: the runnable command and
 // the manifest it was extracted from.
+//
+// Line is the 1-based line number in the parsed document the row was read
+// from. It is zero for rows produced programmatically (for example by an
+// adapter), where no source line exists.
 type Row struct {
 	Command string
 	Source  string
+	Line    int
 }
 
 // RenderTable renders the commands table that is written between markers.
@@ -31,6 +36,9 @@ func RenderTable(rows []Row) string {
 // section of content, skipping table headers, separators, and any other table
 // (only two-cell rows are treated as command rows). It returns ErrNoMarkers
 // when content has no marker pair.
+//
+// Each row carries the 1-based line number it was found on, so callers can
+// tell which rows a given change touched.
 func ParseCommands(content string) ([]Row, error) {
 	sections, err := FindSections(content)
 	if err != nil {
@@ -39,15 +47,23 @@ func ParseCommands(content string) ([]Row, error) {
 	if len(sections) == 0 {
 		return nil, ErrNoMarkers
 	}
+	// lineOf returns the 1-based document line for a byte offset.
+	lineOf := func(off int) int {
+		return strings.Count(content[:off], "\n") + 1
+	}
 	var rows []Row
 	for _, s := range sections {
-		inner := content[s.Start+len(StartMarker) : s.End-len(EndMarker)]
+		innerStart := s.Start + len(StartMarker)
+		inner := content[innerStart : s.End-len(EndMarker)]
+		off := 0
 		for _, line := range strings.Split(inner, "\n") {
-			line = strings.TrimSpace(line)
-			if !strings.HasPrefix(line, "|") || !strings.HasSuffix(line, "|") {
+			lineStart := innerStart + off
+			off += len(line) + 1 // +1 for the newline the split consumed
+			trimmed := strings.TrimSpace(line)
+			if !strings.HasPrefix(trimmed, "|") || !strings.HasSuffix(trimmed, "|") {
 				continue
 			}
-			cells := strings.Split(strings.TrimSuffix(strings.TrimPrefix(line, "|"), "|"), "|")
+			cells := strings.Split(strings.TrimSuffix(strings.TrimPrefix(trimmed, "|"), "|"), "|")
 			if len(cells) != 2 {
 				continue
 			}
@@ -56,7 +72,7 @@ func ParseCommands(content string) ([]Row, error) {
 			if cmd == "" || cmd == "Command" || strings.Trim(cmd, "-") == "" || strings.HasPrefix(cmd, "_") {
 				continue
 			}
-			rows = append(rows, Row{Command: cmd, Source: src})
+			rows = append(rows, Row{Command: cmd, Source: src, Line: lineOf(lineStart)})
 		}
 	}
 	return rows, nil

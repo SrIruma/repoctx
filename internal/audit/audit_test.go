@@ -165,8 +165,8 @@ func TestCandidatePaths(t *testing.T) {
 		t.Fatalf("candidatePaths = %v, want %v", got, want)
 	}
 	for i := range want {
-		if got[i] != want[i] {
-			t.Errorf("candidatePaths[%d] = %q, want %q", i, got[i], want[i])
+		if got[i].value != want[i] {
+			t.Errorf("candidatePaths[%d] = %q, want %q", i, got[i].value, want[i])
 		}
 	}
 }
@@ -186,8 +186,8 @@ func TestCandidatePathsIgnoresMultilineSpans(t *testing.T) {
 		t.Fatalf("candidatePaths = %v, want %v", got, want)
 	}
 	for i := range want {
-		if got[i] != want[i] {
-			t.Errorf("candidatePaths[%d] = %q, want %q", i, got[i], want[i])
+		if got[i].value != want[i] {
+			t.Errorf("candidatePaths[%d] = %q, want %q", i, got[i].value, want[i])
 		}
 	}
 }
@@ -276,5 +276,83 @@ func TestAuditResolvesPathsRelativeToContextFileDir(t *testing.T) {
 	}
 	if len(c.Issues) != 1 || c.Issues[0].Path != "missing.md" {
 		t.Errorf("expected only missing.md to be stale, got %+v", c.Issues)
+	}
+}
+
+// With a since set that does not cover the ghost line, the finding is
+// inherited rot: reported as pre-existing and non-gating.
+func TestAuditSincePreExistingDoesNotGate(t *testing.T) {
+	dir := fixtureDir(t, "ghost")
+	r, err := Run(Options{
+		Root:   dir,
+		File:   filepath.Join(dir, "AGENTS.md"),
+		Actual: extractActual(t, dir),
+		Since:  map[int]bool{1: true}, // only line 1 changed; ghost is line 10
+	})
+	if err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+	c := checkByName(r, "commands")
+	if c == nil {
+		t.Fatal("missing commands check")
+	}
+	if len(c.Issues) != 1 || c.Issues[0].Scope != "pre-existing" {
+		t.Fatalf("expected one pre-existing issue, got %+v", c.Issues)
+	}
+	if !c.Passed {
+		t.Errorf("check should pass when only pre-existing issues remain")
+	}
+	if !r.Passed || r.Score != 100 {
+		t.Errorf("report should pass at 100, got score=%d passed=%v", r.Score, r.Passed)
+	}
+	if r.NewIssues != 0 || r.PreExisting != 1 {
+		t.Errorf("counts: new=%d pre=%d, want 0/1", r.NewIssues, r.PreExisting)
+	}
+}
+
+// With a since set covering the ghost line, the finding is new and gates.
+func TestAuditSinceNewIssueGates(t *testing.T) {
+	dir := fixtureDir(t, "ghost")
+	r, err := Run(Options{
+		Root:   dir,
+		File:   filepath.Join(dir, "AGENTS.md"),
+		Actual: extractActual(t, dir),
+		Since:  map[int]bool{10: true},
+	})
+	if err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+	c := checkByName(r, "commands")
+	if c == nil || len(c.Issues) != 1 || c.Issues[0].Scope != "new" {
+		t.Fatalf("expected one new issue, got %+v", c)
+	}
+	if c.Passed {
+		t.Errorf("check should fail on a new issue")
+	}
+	if r.Passed {
+		t.Errorf("report should fail with a new issue")
+	}
+	if r.NewIssues != 1 {
+		t.Errorf("new issue count = %d, want 1", r.NewIssues)
+	}
+}
+
+// Without a since set the behaviour is unchanged: every issue fails.
+func TestAuditNoSinceUnchanged(t *testing.T) {
+	dir := fixtureDir(t, "ghost")
+	r, err := Run(Options{
+		Root:   dir,
+		File:   filepath.Join(dir, "AGENTS.md"),
+		Actual: extractActual(t, dir),
+	})
+	if err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+	c := checkByName(r, "commands")
+	if c == nil || len(c.Issues) != 1 || c.Issues[0].Scope != "" {
+		t.Fatalf("expected one unclassified issue, got %+v", c)
+	}
+	if c.Passed || r.Passed {
+		t.Errorf("report should fail with no since set")
 	}
 }

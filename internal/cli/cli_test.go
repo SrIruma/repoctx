@@ -303,7 +303,7 @@ func TestAuditCLIHuman(t *testing.T) {
 	cmd := &cobra.Command{}
 	var buf bytes.Buffer
 	cmd.SetOut(&buf)
-	if err := runAudit(cmd, []string{dir}, false, false, scanFlags{}); err != nil {
+	if err := runAudit(cmd, []string{dir}, false, false, "", scanFlags{}); err != nil {
 		t.Fatalf("runAudit: %v", err)
 	}
 	out := buf.String()
@@ -317,7 +317,7 @@ func TestAuditCLIJSON(t *testing.T) {
 	cmd := &cobra.Command{}
 	var buf bytes.Buffer
 	cmd.SetOut(&buf)
-	if err := runAudit(cmd, []string{dir}, true, false, scanFlags{}); err != nil {
+	if err := runAudit(cmd, []string{dir}, true, false, "", scanFlags{}); err != nil {
 		t.Fatalf("runAudit: %v", err)
 	}
 	var reports []audit.Report
@@ -333,7 +333,7 @@ func TestAuditCLICheckFails(t *testing.T) {
 	dir := filepath.Join("..", "..", "tests", "fixtures", "audit", "ghost")
 	cmd := &cobra.Command{}
 	cmd.SetOut(&bytes.Buffer{})
-	err := runAudit(cmd, []string{dir}, false, true, scanFlags{})
+	err := runAudit(cmd, []string{dir}, false, true, "", scanFlags{})
 	var ee *exitError
 	if !errors.As(err, &ee) || ee.code != 1 {
 		t.Fatalf("expected *exitError{code:1}, got %v", err)
@@ -344,7 +344,7 @@ func TestAuditCLICheckPasses(t *testing.T) {
 	dir := filepath.Join("..", "..", "tests", "fixtures", "audit", "healthy")
 	cmd := &cobra.Command{}
 	cmd.SetOut(&bytes.Buffer{})
-	if err := runAudit(cmd, []string{dir}, false, true, scanFlags{}); err != nil {
+	if err := runAudit(cmd, []string{dir}, false, true, "", scanFlags{}); err != nil {
 		t.Fatalf("expected nil error on healthy fixture, got %v", err)
 	}
 }
@@ -354,7 +354,7 @@ func TestAuditCLICheckJSON(t *testing.T) {
 	cmd := &cobra.Command{}
 	var buf bytes.Buffer
 	cmd.SetOut(&buf)
-	err := runAudit(cmd, []string{dir}, true, true, scanFlags{})
+	err := runAudit(cmd, []string{dir}, true, true, "", scanFlags{})
 	var ee *exitError
 	if !errors.As(err, &ee) || ee.code != 1 {
 		t.Fatalf("expected *exitError{code:1}, got %v", err)

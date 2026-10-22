@@ -24,6 +24,7 @@ const (
 
 func newAuditCmd() *cobra.Command {
 	var jsonOut, check bool
+	var since string
 	var files []string
 	var opts scanFlags
 	cmd := &cobra.Command{
@@ -33,7 +34,10 @@ func newAuditCmd() *cobra.Command {
 			"code: ghost commands claimed between repoctx markers and stale repository\n" +
 			"paths referenced anywhere in the file. Reports a health score per file.\n" +
 			"With --check the command exits non-zero when any file fails, so it can\n" +
-			"gate merges in CI.",
+			"gate merges in CI.\n" +
+			"With --since <rev> only findings on lines changed since that revision\n" +
+			"count as failures: inherited rot is reported but does not gate, so a\n" +
+			"fleet can adopt the gate without fixing every repo first.",
 		Args: cobra.ArbitraryArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			roots := args
@@ -67,18 +71,20 @@ func newAuditCmd() *cobra.Command {
 				skipDirsSet: cmd.Flags().Changed("skip-dirs"),
 				filesSet:    cmd.Flags().Changed("file"),
 			}
-			return runAudit(cmd, roots, jsonOut, check, flags)
+			return runAudit(cmd, roots, jsonOut, check, since, flags)
 		},
 	}
 	cmd.Flags().BoolVar(&jsonOut, "json", false, "output as JSON")
 	cmd.Flags().BoolVar(&check, "check", false, "exit non-zero when any file fails (CI gating)")
+	cmd.Flags().StringVar(&since, "since", "",
+		"only fail on findings on lines changed since this revision (e.g. HEAD, origin/main)")
 	cmd.Flags().StringSliceVar(&files, "file", nil,
 		"context file to audit (repeatable, replaces config/defaults)")
 	addScanFlags(cmd, &opts)
 	return cmd
 }
 
-func runAudit(cmd *cobra.Command, roots []string, jsonOut, check bool, flags scanFlags) error {
+func runAudit(cmd *cobra.Command, roots []string, jsonOut, check bool, since string, flags scanFlags) error {
 	type rootReport struct {
 		Root  string          `json:"root"`
 		Files []*audit.Report `json:"files"`
@@ -87,6 +93,8 @@ func runAudit(cmd *cobra.Command, roots []string, jsonOut, check bool, flags sca
 	var flatReports []*audit.Report
 	totalPassed := 0
 	totalFiles := 0
+	totalNew := 0
+	totalPreExisting := 0
 	anyFailed := false
 
 	for _, r := range roots {
@@ -112,10 +120,20 @@ func runAudit(cmd *cobra.Command, roots []string, jsonOut, check bool, flags sca
 		targets := contextTargets(p, res, defaultContextFiles)
 		var reports []*audit.Report
 		for _, name := range contextFiles(abs, targets) {
+			filePath := filepath.Join(abs, name)
+			var sinceLines map[int]bool
+			if since != "" {
+				lines, err := changedLines(abs, filePath, since)
+				if err != nil {
+					return err
+				}
+				sinceLines = lines
+			}
 			rep, err := audit.Run(audit.Options{
 				Root:   abs,
-				File:   filepath.Join(abs, name),
+				File:   filePath,
 				Actual: actual,
+				Since:  sinceLines,
 			})
 			if err != nil {
 				return fmt.Errorf("%s: %w", name, err)
@@ -130,6 +148,8 @@ func runAudit(cmd *cobra.Command, roots []string, jsonOut, check bool, flags sca
 			if rep.Passed {
 				totalPassed++
 			}
+			totalNew += rep.NewIssues
+			totalPreExisting += rep.PreExisting
 		}
 		allReports = append(allReports, rootReport{Root: abs, Files: reports})
 		flatReports = append(flatReports, reports...)
@@ -163,10 +183,13 @@ func runAudit(cmd *cobra.Command, roots []string, jsonOut, check bool, flags sca
 				fleetScore = totalPassed * 100 / totalFiles
 			}
 			out := struct {
-				Roots      []string     `json:"roots"`
-				Reports    []rootReport `json:"reports"`
-				FleetScore int          `json:"fleet_score"`
-				Passed     bool         `json:"passed"`
+				Roots       []string     `json:"roots"`
+				Reports     []rootReport `json:"reports"`
+				FleetScore  int          `json:"fleet_score"`
+				Passed      bool         `json:"passed"`
+				Since       string       `json:"since,omitempty"`
+				NewIssues   int          `json:"new_issues,omitempty"`
+				PreExisting int          `json:"pre_existing,omitempty"`
 			}{
 				Roots: func() []string {
 					r := make([]string, 0, len(allReports))
@@ -175,9 +198,12 @@ func runAudit(cmd *cobra.Command, roots []string, jsonOut, check bool, flags sca
 					}
 					return r
 				}(),
-				Reports:    allReports,
-				FleetScore: fleetScore,
-				Passed:     !anyFailed,
+				Reports:     allReports,
+				FleetScore:  fleetScore,
+				Passed:      !anyFailed,
+				Since:       since,
+				NewIssues:   totalNew,
+				PreExisting: totalPreExisting,
 			}
 			enc := json.NewEncoder(cmd.OutOrStdout())
 			enc.SetIndent("", "  ")
@@ -198,6 +224,10 @@ func runAudit(cmd *cobra.Command, roots []string, jsonOut, check bool, flags sca
 		}
 		fmt.Fprintf(cmd.OutOrStdout(), "\nFleet: %s  score %d/100  (%d/%d files passed)\n",
 			status, fleetScore, totalPassed, totalFiles)
+		if since != "" {
+			fmt.Fprintf(cmd.OutOrStdout(), "Since %s: %d new, %d pre-existing\n",
+				since, totalNew, totalPreExisting)
+		}
 	}
 
 	if check && anyFailed {
@@ -234,8 +264,15 @@ func printReport(w io.Writer, r *audit.Report) {
 		}
 		fmt.Fprintf(w, "  %s %s: %s\n", mark, c.Name, c.Detail)
 		for _, iss := range c.Issues {
-			fmt.Fprintf(w, "    - %s: %s\n", colorize(w, ansiYellow, issueLabel(iss)), iss.Detail)
+			detail := iss.Detail
+			if iss.Scope != "" {
+				detail += " (" + iss.Scope + ")"
+			}
+			fmt.Fprintf(w, "    - %s: %s\n", colorize(w, ansiYellow, issueLabel(iss)), detail)
 		}
+	}
+	if r.NewIssues > 0 || r.PreExisting > 0 {
+		fmt.Fprintf(w, "  since base: %d new, %d pre-existing\n", r.NewIssues, r.PreExisting)
 	}
 }
 

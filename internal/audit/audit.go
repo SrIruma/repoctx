@@ -19,6 +19,14 @@ type Issue struct {
 	Command string `json:"command,omitempty"`
 	Path    string `json:"path,omitempty"`
 	Detail  string `json:"detail"`
+	// Line is the 1-based line in the context file the finding came from.
+	// It is zero when the finding cannot be tied to a line.
+	Line int `json:"line,omitempty"`
+	// Scope classifies the finding against the diff base, when the caller
+	// asked for one (audit --since). It is empty when no base was given,
+	// "new" when the finding's line was changed since the base, and
+	// "pre-existing" otherwise.
+	Scope string `json:"scope,omitempty"`
 }
 
 // Check is the result of one audit check.
@@ -35,6 +43,11 @@ type Report struct {
 	Checks []Check `json:"checks"`
 	Score  int     `json:"score"`
 	Passed bool    `json:"passed"`
+	// NewIssues and PreExisting are set only for an incremental audit
+	// (audit --since). NewIssues counts findings introduced since the base and
+	// drives Passed; PreExisting counts inherited rot, reported but not gated.
+	NewIssues   int `json:"new_issues,omitempty"`
+	PreExisting int `json:"pre_existing,omitempty"`
 }
 
 // Options configures an audit run.
@@ -42,6 +55,17 @@ type Options struct {
 	Root   string            // repository root
 	File   string            // path to the context file
 	Actual []project.Command // commands extractable from the project
+
+	// Since, when non-zero, is the set of 1-based line numbers of File that
+	// were added or changed since a diff base. Each finding whose line is in
+	// the set is classified "new"; every other finding is "pre-existing".
+	// When the set is nil (the default) no classification happens and every
+	// finding counts as a failure, which is the historical behaviour.
+	//
+	// Since is the only thing that differs between a whole-repo audit and an
+	// incremental one; the checks themselves are unchanged, so the engine
+	// never has to know how the set was computed (git, or anything else).
+	Since map[int]bool
 }
 
 // Run audits the context file at Options.File and returns its report.
@@ -54,6 +78,7 @@ func Run(o Options) (*Report, error) {
 	report := &Report{File: o.File}
 	report.Checks = append(report.Checks, checkCommands(text, o.Actual))
 	report.Checks = append(report.Checks, checkPaths(text, o.Root, filepath.Dir(o.File), o.Actual))
+	classify(report, o.Since)
 	passed := 0
 	for _, c := range report.Checks {
 		if c.Passed {
@@ -63,6 +88,45 @@ func Run(o Options) (*Report, error) {
 	report.Score = passed * 100 / len(report.Checks)
 	report.Passed = report.Score == 100
 	return report, nil
+}
+
+// classify tags each issue as "new" or "pre-existing" against the changed-line
+// set and recomputes which checks fail. With no set (the default whole-repo
+// audit) issues keep an empty scope and every check that found one fails.
+//
+// When a set is given, a check fails only on its "new" issues: rot the caller
+// inherited is reported but does not gate. The per-check and per-report counts
+// are refreshed so the score reflects the new-only verdict.
+func classify(report *Report, since map[int]bool) {
+	if since == nil {
+		return
+	}
+	report.NewIssues = 0
+	report.PreExisting = 0
+	for i := range report.Checks {
+		c := &report.Checks[i]
+		newCount, preCount := 0, 0
+		for j := range c.Issues {
+			if c.Issues[j].Line != 0 && since[c.Issues[j].Line] {
+				c.Issues[j].Scope = "new"
+				newCount++
+			} else {
+				c.Issues[j].Scope = "pre-existing"
+				preCount++
+			}
+		}
+		report.NewIssues += newCount
+		report.PreExisting += preCount
+		c.Passed = newCount == 0
+		switch {
+		case newCount > 0 && preCount > 0:
+			c.Detail = fmt.Sprintf("%d new and %d pre-existing issue(s) since base", newCount, preCount)
+		case newCount > 0:
+			c.Detail = fmt.Sprintf("%d new issue(s) since base", newCount)
+		case preCount > 0:
+			c.Detail = fmt.Sprintf("%d pre-existing issue(s); none new since base", preCount)
+		}
+	}
 }
 
 // checkCommands flags commands claimed between the markers that cannot be
@@ -85,6 +149,7 @@ func checkCommands(content string, actual []project.Command) Check {
 			c.Passed = false
 			c.Issues = append(c.Issues, Issue{
 				Command: r.Command,
+				Line:    r.Line,
 				Detail:  "ghost command: no longer present in the project",
 			})
 		}
@@ -148,13 +213,14 @@ func checkPaths(content string, root, fileDir string, actual []project.Command) 
 	}
 	c := Check{Name: "paths", Passed: true, Detail: "all referenced paths exist"}
 	for _, cand := range candidatePaths(content) {
-		if exclude[cand] {
+		if exclude[cand.value] {
 			continue
 		}
-		if !pathExists(fileDir, cand) && !pathExists(root, cand) {
+		if !pathExists(fileDir, cand.value) && !pathExists(root, cand.value) {
 			c.Passed = false
 			c.Issues = append(c.Issues, Issue{
-				Path:   cand,
+				Path:   cand.value,
+				Line:   cand.line,
 				Detail: "stale path: not found in repository",
 			})
 		}
@@ -176,17 +242,25 @@ func pathExists(base, cand string) bool {
 	return err == nil
 }
 
-// candidatePaths extracts path-like references from a context file.
+// pathCandidate is a path-like reference found in a context file, together
+// with the 1-based line number it appeared on.
+type pathCandidate struct {
+	value string
+	line  int
+}
+
+// candidatePaths extracts path-like references from a context file, with the
+// line each was found on.
 //
 // Candidates are collected line by line. The backtick pattern matches
 // whatever sits between two backticks, so scanning the whole file at once
 // also matches the gap between two separate inline spans ("... `code`.\n- `other`")
 // and the body of a fenced block. Neither is a path, and both used to be
 // reported as stale paths that do not exist.
-func candidatePaths(content string) []string {
+func candidatePaths(content string) []pathCandidate {
 	seen := map[string]bool{}
-	var out []string
-	add := func(s string) {
+	var out []pathCandidate
+	add := func(s string, line int) {
 		s = strings.TrimSpace(s)
 		if i := strings.Index(s, "#"); i >= 0 {
 			s = s[:i]
@@ -196,14 +270,15 @@ func candidatePaths(content string) []string {
 			return
 		}
 		seen[s] = true
-		out = append(out, s)
+		out = append(out, pathCandidate{value: s, line: line})
 	}
-	for _, line := range strings.Split(content, "\n") {
+	for i, line := range strings.Split(content, "\n") {
+		lineNo := i + 1
 		for _, m := range backtickPath.FindAllStringSubmatch(line, -1) {
-			add(m[1])
+			add(m[1], lineNo)
 		}
 		for _, m := range linkPath.FindAllStringSubmatch(line, -1) {
-			add(m[1])
+			add(m[1], lineNo)
 		}
 	}
 	return out

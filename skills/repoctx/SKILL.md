@@ -14,7 +14,7 @@ repoctx keeps AI coding-agent context files (AGENTS.md, CLAUDE.md, .cursorrules)
 - The user asks to update or refresh AGENTS.md / CLAUDE.md / .cursorrules.
 - A context file looks out of date (commands, paths, modules).
 - Before finishing a task that changed commands, scripts, dependencies, manifests or package layout.
-- In CI, to gate merges on context drift.
+- In CI, to gate merges on context drift (use `--since` so only drift the change introduced fails).
 
 ## When NOT to use
 
@@ -33,6 +33,7 @@ repoctx keeps AI coding-agent context files (AGENTS.md, CLAUDE.md, .cursorrules)
 - Never hand-edit the tables between `<!-- repoctx:start -->` and `<!-- repoctx:end -->`.
 - Run `repoctx generate .` after changing commands, scripts, dependencies or manifests.
 - Run `repoctx audit . --check` before finishing; fix anything it reports.
+- In CI, add `--since <rev>` to `audit --check` so only findings on lines changed since `<rev>` fail; inherited rot is reported but does not block the merge.
 - Prefer `--file` to target a specific context file; otherwise repoctx discovers all AGENTS.md/CLAUDE.md in the tree.
 
 ## Output format
@@ -64,6 +65,8 @@ When you report an audit result, use this shape:
 - `no context files found`: the repo has no AGENTS.md/CLAUDE.md; run `repoctx init`.
 - `audit` reports stale paths: the referenced file moved or was renamed; update or remove the reference.
 - `audit` reports ghost commands: a claimed command no longer exists in any manifest; remove it.
+- `audit --since` says `pre-existing`: the rot predates the base revision; it does not fail the run. Fix it or leave it as accepted debt.
+- `audit --since` errors: the root is not a git working tree, or the revision cannot be resolved.
 - Markers missing: `generate` refuses to overwrite a file without markers; add `<!-- repoctx:start -->` / `<!-- repoctx:end -->` or use `init`.
 
 ## Repo Context Maintenance
