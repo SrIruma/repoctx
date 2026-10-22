@@ -171,6 +171,27 @@ func TestCandidatePaths(t *testing.T) {
 	}
 }
 
+// A reference that spans lines is not a path. The backtick pattern matches
+// whatever sits between two backticks, which in prose is often the gap
+// between two separate inline spans and in fenced blocks is the block itself.
+// Those used to be reported as stale paths that do not exist.
+func TestCandidatePathsIgnoresMultilineSpans(t *testing.T) {
+	content := "The engine is MIT.\n" +
+		"- use `repoctx-plus` for the paid tier.\n" +
+		"```sh\n./package.sh        # builds the package\n```\n" +
+		"Real path: `scripts/setup.sh`"
+	got := candidatePaths(content)
+	want := []string{"scripts/setup.sh"}
+	if len(got) != len(want) {
+		t.Fatalf("candidatePaths = %v, want %v", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Errorf("candidatePaths[%d] = %q, want %q", i, got[i], want[i])
+		}
+	}
+}
+
 func TestIsPathLike(t *testing.T) {
 	cases := map[string]bool{
 		"backend/schema.md":    true,
