@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The paid tier (`repoctx+`) is now a **one-time purchase** with a perpetual
+  license instead of a subscription, and it carries no human work: no audits
+  of the buyer's repositories, no contractual support, no service level. The
+  public description of the tier was updated to match.
+
 ### Added
 
 - `make skill-package` builds `dist/repoctx-skill.zip`, the package to upload to

@@ -18,7 +18,7 @@ Estado actual: **v0.9.0** (Fase 2 cerrada). Contrato en 0.x, no congelado.
 
 ## En curso — Fase 3 · v0.10.0 "repoctx+"
 
-- [ ] Publicar la skill de pago (`repoctx+`) como suscripción en Agensi.io
+- [ ] Publicar la skill de pago (`repoctx+`) como pago único en Agensi.io
 - [ ] Publicar la skill gratis en Agensi.io (es el embudo)
 
 ## Después
@@ -28,7 +28,9 @@ Estado actual: **v0.9.0** (Fase 2 cerrada). Contrato en 0.x, no congelado.
 ## Notas
 
 - El motor `repoctx` es MIT para siempre. Las fases 1-2 son OSS igual que la 0.
-- La fase 3 vende servicio y conocimiento (`repoctx+`), nunca el binario.
+- La fase 3 vende conocimiento (`repoctx+`), nunca el binario. Es un pago
+  único, no una suscripción: no hay soporte por contrato ni trabajo humano
+  en los repos del comprador.
 - La decisión de seguir o abandonar el tier pago se toma el 2026-12-14.
 - Semver: fix → patch, feature → minor, cambio de contrato → major (y se avisa).
 - Cada fase termina con un release tagueado y un milestone cerrado en GitHub.

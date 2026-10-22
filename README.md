@@ -79,9 +79,10 @@ To publish it to a skill marketplace, build the package with
 
 The free skill covers a single repository. `repoctx+` is the paid tier for
 teams: per-stack playbooks (Java, SaaS, monorepo, microservices, game-dev),
-versioned `repoctx.toml` policies, `AGENTS.md` templates, a fleet-wide audit
-and a quarterly human drift audit. The engine stays MIT — what is sold is the
-curated knowledge and the service around it.
+versioned `repoctx.toml` policies, `AGENTS.md` templates and a fleet-wide
+audit. It is a one-time purchase with a perpetual license, not a
+subscription, and the fleet audit runs on your side. The engine stays MIT —
+what is sold is the curated knowledge.
 
 ## Commands
 
