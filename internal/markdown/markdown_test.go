@@ -60,9 +60,31 @@ func TestRenderSectionRoundTrip(t *testing.T) {
 		t.Fatalf("expected %d command rows, got %d (module rows must be skipped):\n%s", len(commands), len(rows), block)
 	}
 	for i := range commands {
-		if rows[i] != commands[i] {
-			t.Errorf("rows[%d] = %+v, want %+v", i, rows[i], commands[i])
+		if rows[i].Command != commands[i].Command || rows[i].Source != commands[i].Source {
+			t.Errorf("rows[%d] = %+v, want command/source of %+v", i, rows[i], commands[i])
 		}
+		if rows[i].Line == 0 {
+			t.Errorf("rows[%d] = %+v, want a non-zero line number", i, rows[i])
+		}
+	}
+}
+
+// ParseCommands records the 1-based document line each row was found on.
+func TestParseCommandsLineNumbers(t *testing.T) {
+	doc := "intro\n\n" + StartMarker + "\n" +
+		"| Command | Source |\n" +
+		"|---|---|\n" +
+		"| `go test ./...` | `go.mod` |\n" +
+		EndMarker + "\ntail\n"
+	rows, err := ParseCommands(doc)
+	if err != nil {
+		t.Fatalf("ParseCommands: %v", err)
+	}
+	if len(rows) != 1 {
+		t.Fatalf("expected 1 row, got %d", len(rows))
+	}
+	if rows[0].Line != 6 {
+		t.Errorf("row line = %d, want 6", rows[0].Line)
 	}
 }
 

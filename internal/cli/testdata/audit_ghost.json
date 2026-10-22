@@ -9,7 +9,8 @@
         "issues": [
           {
             "command": "npm run lint",
-            "detail": "ghost command: no longer present in the project"
+            "detail": "ghost command: no longer present in the project",
+            "line": 10
           }
         ]
       },

@@ -14,7 +14,8 @@
         "issues": [
           {
             "path": "legacy/schema.md",
-            "detail": "stale path: not found in repository"
+            "detail": "stale path: not found in repository",
+            "line": 5
           }
         ]
       }
