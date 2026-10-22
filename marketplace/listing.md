@@ -2,10 +2,8 @@
 
 Copy-paste material for the free listing in the Agensi creator dashboard.
 
-This listing is the top of the funnel: it is what a buyer discovers, and it
-is what leads to `repoctx+`. Publish it even if the paid listing is still in
-review — a free listing can go live on its own, and it does not need payouts
-connected.
+This listing is the free skill. Publish it as soon as the package is ready: a
+free listing can go live on its own, and it does not need payouts connected.
 
 Specs verified against Agensi's creator docs on 2026-10-21. Where a number
 appears, it is a platform limit.
@@ -53,9 +51,8 @@ Keep AGENTS.md, CLAUDE.md and .cursorrules truthful: regenerate the code-derived
 > repoctx is free and MIT. The engine is open source:
 > https://github.com/SrIruma/repoctx
 >
-> Need it for a fleet of repositories instead of one? That is the paid tier,
-> `repoctx+`: per-stack playbooks, tuned `repoctx.toml` policies, `AGENTS.md`
-> templates and a fleet-wide audit.
+> Working with a fleet of repositories? The fleet version is not public yet —
+> say it in the listing and it gets built.
 
 ## Category / tags
 
@@ -71,8 +68,7 @@ Tags: `agents-md`, `claude-md`, `context-drift`, `code-quality`, `documentation`
 
 ## Price
 
-**Free.** Free listings can be published without payouts connected; the
-payout connection is only required for a paid skill.
+**Free.** Free listings can be published without payouts connected.
 
 ## Logo
 
@@ -114,6 +110,4 @@ free for existing buyers.
 - [x] Price set to free
 - [ ] Logo uploaded (512×512, ≤2 MB)
 - [ ] At least one screenshot uploaded
-- [ ] Description pasted from this file
-- [ ] Link to the paid listing added to the description and to the package
-      README — **add it once the repoctx+ listing URL exists**
+- [ ] Description pasted from this file**

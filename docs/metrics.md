@@ -1,7 +1,7 @@
 # Metrics and kill criteria — Fase 2
 
-Fase 2 decides whether the paid tier (Fase 3/4) is justified. These are the
-signals to track and the thresholds that trigger a decision.
+Fase 2 decides whether the skill keeps finding users. These are the signals
+to track and the thresholds that trigger a decision.
 
 ## What to measure
 
@@ -20,14 +20,14 @@ Weekly snapshot during Fase 2 (8 weeks). Record in a simple table or issue.
 
 ## Kill criteria (week 8)
 
-If **all** of the following hold, repoctx stays OSS/portfolio and the paid tier
-is postponed (a valid decision, not a failure):
+If **all** of the following hold, repoctx stays an OSS/portfolio project and
+no further investment goes into it (a valid decision, not a failure):
 
 - < 50 stars on the skill
 - < 5 teams using it
 - 0 responses from teams with >3 repos
 
-If any signal is strong, proceed to Fase 3.
+If any signal is strong, keep going.
 
 ## Decision date
 

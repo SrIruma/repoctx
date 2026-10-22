@@ -16,13 +16,17 @@ Estado actual: **v0.9.0** (Fase 2 cerrada). Contrato en 0.x, no congelado.
 - [x] SKILL.md canónico publicado en 8+ canales (in-repo)
 - [x] Instrumentación de métricas (docs/metrics.md)
 
+## En curso — Fase 3 · v0.10.0 "marketplace"
+
+- [ ] Publicar la skill en Agensi.io (el paquete sale de `make skill-package`)
+- [ ] Publicar la skill en los marketplaces oficiales de agentes
+
 ## Después
 
-- Fase 3 — skill de pago (playbooks, policy, fleet) · v0.10.0
-- Fase 4 — MCP server (enforcement + histórico) · v0.11.0 (repo aparte)
+- Enforcement e histórico (MCP server) · repo aparte, más adelante
 
 ## Notas
 
-- El motor `repoctx` es MIT para siempre. Las fases 1-2 son OSS igual que la 0.
+- El motor `repoctx` es MIT para siempre.
 - Semver: fix → patch, feature → minor, cambio de contrato → major (y se avisa).
 - Cada fase termina con un release tagueado y un milestone cerrado en GitHub.
