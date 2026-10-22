@@ -177,6 +177,12 @@ func pathExists(base, cand string) bool {
 }
 
 // candidatePaths extracts path-like references from a context file.
+//
+// Candidates are collected line by line. The backtick pattern matches
+// whatever sits between two backticks, so scanning the whole file at once
+// also matches the gap between two separate inline spans ("... `code`.\n- `other`")
+// and the body of a fenced block. Neither is a path, and both used to be
+// reported as stale paths that do not exist.
 func candidatePaths(content string) []string {
 	seen := map[string]bool{}
 	var out []string
@@ -192,11 +198,13 @@ func candidatePaths(content string) []string {
 		seen[s] = true
 		out = append(out, s)
 	}
-	for _, m := range backtickPath.FindAllStringSubmatch(content, -1) {
-		add(m[1])
-	}
-	for _, m := range linkPath.FindAllStringSubmatch(content, -1) {
-		add(m[1])
+	for _, line := range strings.Split(content, "\n") {
+		for _, m := range backtickPath.FindAllStringSubmatch(line, -1) {
+			add(m[1])
+		}
+		for _, m := range linkPath.FindAllStringSubmatch(line, -1) {
+			add(m[1])
+		}
 	}
 	return out
 }
