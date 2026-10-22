@@ -61,6 +61,20 @@ fi
 rm -rf dist/pkg
 mkdir -p "$STAGE"
 cp "$SKILL_MD" "$STAGE/SKILL.md"
+
+# The marketplace expects more than a bare SKILL.md: a README in the skill
+# folder and at least one supporting file. Those live in marketplace/ so the
+# canonical skill stays the single file every agent channel installs.
+if [ -d "marketplace/$SKILL_NAME" ]; then
+	cp -R "marketplace/$SKILL_NAME/." "$STAGE/"
+fi
+
+supporting="$(find "$STAGE" -type f ! -name SKILL.md | wc -l)"
+if [ "$supporting" -lt 1 ]; then
+	echo "the package has no supporting file — the marketplace expects at least one" >&2
+	exit 1
+fi
+
 rm -f "$OUT"
 
 python3 - "$OUT" "$STAGE" << 'PY'
