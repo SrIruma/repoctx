@@ -19,6 +19,10 @@ The code is split into small, single-purpose packages:
 - `internal/adapters/` - one adapter per manifest format (npm, cargo, go, pyproject, make, cmake, ruby, composer, maven, gradle).
 - `internal/markdown/` - marker-aware parsing and rendering of context files.
 - `internal/audit/` - rot checks and report scoring.
+- `marketplace/` - material for the Agensi listing of the free skill: the
+  listing copy (`marketplace/listing.md`) and the package content that ships only in the
+  marketplace ZIP (`repoctx/`). The canonical skill stays one file, so the
+  in-repo agent channels install SKILL.md alone.
 - `tests/fixtures/` - fixture projects used by tests.
 
 ## Conventions
@@ -34,6 +38,9 @@ The code is split into small, single-purpose packages:
   `repoctx generate .` and verify with `repoctx audit . --check`.
 - Development quickstart: `make test`, `make build`; before committing run
   `go vet ./...` and `gofmt -l .`. See CONTRIBUTING.md.
+- The marketplace package is built with `make skill-package`; it must contain
+  SKILL.md, a README and at least one supporting file, and it fails if the
+  skill drifted from `repoctx skill` output.
 - In the Commands table, "Source" is the manifest that triggered the adapter —
   e.g. `go vet ./...` is an adapter convention, not a literal `go.mod` key.
 

@@ -12,7 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `make skill-package` builds `dist/repoctx-skill.zip`, the package to upload to
   a skill marketplace: a single `repoctx/SKILL.md` folder. The build fails if
   the frontmatter name does not match the folder, if the description is missing,
-  or if the skill drifted from `repoctx skill` output.
+  if the skill drifted from `repoctx skill` output, or if the package ends up
+  with no supporting file.
+- `marketplace/` holds the listing copy and the package content for the free
+  skill on Agensi: a README for the buyer and `references/patterns.md`, the
+  rot patterns the audit catches with the exact output of each case. The
+  canonical skill stays a single file, so the in-repo agent channels are
+  unaffected.
 
 ### Fixed
 
