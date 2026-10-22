@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `audit` no longer reports phantom stale paths. Path candidates are collected
+  line by line, so the gap between two separate inline code spans and the body
+  of a fenced code block are no longer parsed as a path. A context file that
+  mentioned a real path in prose but had a code block below it used to score
+  50/100 for paths that did not exist.
+
 ## [v0.9.0] - 2026-10-21
 
 ### Added
