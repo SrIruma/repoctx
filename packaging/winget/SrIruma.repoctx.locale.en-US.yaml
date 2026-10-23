@@ -1,5 +1,7 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
 PackageIdentifier: SrIruma.repoctx
-PackageVersion: 0.9.0
+PackageVersion: 0.10.0
 PackageLocale: en-US
 Publisher: SrIruma
 PublisherUrl: https://github.com/SrIruma
@@ -9,4 +11,4 @@ PackageUrl: https://github.com/SrIruma/repoctx
 License: MIT
 ShortDescription: Keep your AI coding-agent context files (AGENTS.md, CLAUDE.md) truthful.
 ManifestType: defaultLocale
-ManifestVersion: 1.6.0
+ManifestVersion: 1.12.0

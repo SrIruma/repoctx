@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `npm/README.md` is staged into the main npm package and all six platform
+  packages, and explicitly included in each package's published files.
 - `repoctx audit --since <rev>` runs an incremental audit: findings whose line
   was added or changed since `<rev>` are "new" and gate the run; inherited
   findings are "pre-existing" and are reported without failing. This lets a

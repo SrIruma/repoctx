@@ -24,6 +24,7 @@ stage() {
         exit 1
     fi
     cp "dist/${artifact}" "${dir}/bin/${bin}"
+    cp npm/README.md "${dir}/README.md"
     chmod +x "${dir}/bin/${bin}" 2>/dev/null || true
     # keep package.json version in sync
     python3 - "$dir/package.json" "$version" << 'PY'
@@ -43,6 +44,7 @@ stage win32-x64     repoctx_windows_amd64.exe
 
 # main package version
 mkdir -p npm/repoctx/bin
+cp npm/README.md npm/repoctx/README.md
 python3 - npm/repoctx/package.json "$version" << 'PY'
 import json,sys
 p=sys.argv[1]; v=sys.argv[2]

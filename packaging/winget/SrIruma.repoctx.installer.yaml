@@ -1,15 +1,17 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json
+
 PackageIdentifier: SrIruma.repoctx
-PackageVersion: 0.9.0
+PackageVersion: 0.10.0
 InstallerLocale: en-US
 InstallerType: portable
 Commands:
   - repoctx
 Installers:
   - Architecture: x64
-    InstallerUrl: https://github.com/SrIruma/repoctx/releases/download/v0.9.0/repoctx_windows_amd64.exe
-    InstallerSha256: 6722980e11883f9287dee480e1319a712ffb768a33f85f1f0705278cc845c508
+    InstallerUrl: https://github.com/SrIruma/repoctx/releases/download/v0.10.0/repoctx_windows_amd64.exe
+    InstallerSha256: 0653250d980696a4e97357737a1049d8383aecdc5e78275ae77aaff85387dd28
   - Architecture: arm64
-    InstallerUrl: https://github.com/SrIruma/repoctx/releases/download/v0.9.0/repoctx_windows_arm64.exe
-    InstallerSha256: 7190e60ada3dfbb372901768f290729eac8de6d39ee5a4cc12ff243bc1ba2352
+    InstallerUrl: https://github.com/SrIruma/repoctx/releases/download/v0.10.0/repoctx_windows_arm64.exe
+    InstallerSha256: 82c129ff288bd86207c42cec2582671630846ea7554ca80058b4de1e06006906
 ManifestType: installer
-ManifestVersion: 1.6.0
+ManifestVersion: 1.12.0
