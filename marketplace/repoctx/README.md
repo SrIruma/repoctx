@@ -11,7 +11,7 @@ https://github.com/SrIruma/repoctx
 
 ## Requirements
 
-- The repoctx CLI. `npx repoctx` runs it with no install; `brew install
+- The repoctx CLI. `npx @sriruma/repoctx` runs it with no install; `brew install
   repoctx` and `winget install repoctx` install it permanently.
 - A repository with a manifest: `package.json`, `go.mod`, `pom.xml`,
   `build.gradle`, `Cargo.toml`, `pyproject.toml`, `Makefile`, `CMakeLists.txt`,
@@ -71,7 +71,7 @@ case: ghost commands, stale paths, missing markers, nested context files.
 
 ## Troubleshooting
 
-- `repoctx: command not found` — install the CLI: `npx repoctx`, `brew install
+- `repoctx: command not found` — install the CLI: `npx @sriruma/repoctx`, `brew install
   repoctx` or `winget install repoctx`.
 - `generate` refuses to touch the file — the markers are missing. Add
   `<!-- repoctx:start -->` and `<!-- repoctx:end -->` around the tables, or

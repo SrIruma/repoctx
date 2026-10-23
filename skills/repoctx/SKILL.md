@@ -2,7 +2,7 @@
 name: repoctx
 description: Use when AGENTS.md, CLAUDE.md, .cursorrules or any agent context file must be checked against the real repository — regenerates the code-derived sections (commands, modules, dependencies) and detects rot (ghost commands, stale paths). Triggers on "update AGENTS.md", "context file is out of date", "audit agent context", "repoctx".
 license: MIT
-compatibility: Requires the repoctx CLI (npx repoctx / brew install repoctx). Works in any repo with a manifest.
+compatibility: Requires the repoctx CLI (npx @sriruma/repoctx / brew install repoctx). Works in any repo with a manifest.
 ---
 
 # repoctx

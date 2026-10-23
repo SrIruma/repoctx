@@ -37,7 +37,7 @@ func skillDocument() string {
 	b.WriteString("name: repoctx\n")
 	b.WriteString("description: Use when AGENTS.md, CLAUDE.md, .cursorrules or any agent context file must be checked against the real repository — regenerates the code-derived sections (commands, modules, dependencies) and detects rot (ghost commands, stale paths). Triggers on \"update AGENTS.md\", \"context file is out of date\", \"audit agent context\", \"repoctx\".\n")
 	b.WriteString("license: MIT\n")
-	b.WriteString("compatibility: Requires the repoctx CLI (npx repoctx / brew install repoctx). Works in any repo with a manifest.\n")
+	b.WriteString("compatibility: Requires the repoctx CLI (npx @sriruma/repoctx / brew install repoctx). Works in any repo with a manifest.\n")
 	b.WriteString("---\n\n")
 	b.WriteString("# repoctx\n\n")
 	b.WriteString("repoctx keeps AI coding-agent context files (AGENTS.md, CLAUDE.md, .cursorrules) truthful by regenerating the code-derived sections from the real repository and detecting rot.\n\n")
